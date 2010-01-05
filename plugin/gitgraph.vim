@@ -447,7 +447,7 @@ function! s:GitCommitBuffer()
     let msgfile = tempname()
     call writefile(message, msgfile)
     try
-        call s:GitCommit(msgfile, b:gitgraph_commit_amend, 0, b:gitgraph_commit_signoff, 'f') | set nomod
+        call s:GitCommit(msgfile, b:gitgraph_commit_amend, b:gitgraph_commit_signoff, 'f') | set nomod
         if bufno >= 0 | exec 'bwipeout! '.bufno | endif
     finally
         call delete(msgfile)
@@ -801,32 +801,29 @@ function! s:GitCheckoutFiles(fname, ...)
     call s:GitRun('checkout', force, '--', files)
 endfunction
 
-" a:1 = nocommit, a:2 = edit, a:3 = signoff
+" a:1 = nocommit, a:2 = signoff
 function! s:GitRevert(commit, ...)
     let nocommit = exists('a:1') && a:1 ? '--no-commit' : ''
-    let edit = exists('a:2') && a:2 ? '--edit' : '--no-edit'
-    let signoff = exists('a:3') && a:3 ? '--signoff' : ''
-    call s:GitRun('revert', nocommit, edit, signoff, shellescape(commit, 1))
+    let signoff = exists('a:2') && a:2 ? '--signoff' : ''
+    call s:GitRun('revert', nocommit, signoff, shellescape(commit, 1))
     call s:GitGraphView()
 endfunction
 
-" a:1 = nocommit, a:2 = edit, a:3 = signoff, a:4 = attribute
+" a:1 = nocommit, a:2 = signoff, a:3 = attribute
 function! s:GitCherryPick(commit, ...)
     let nocommit = exists('a:1') && a:1 ? '--no-commit' : ''
-    let edit = exists('a:2') && a:2 ? '--edit' : ''
-    let signoff = exists('a:3') && a:3 ? '--signoff' : ''
-    let attrib = exists('a:4') && a:4 ? '-x' : '-r'
-    call s:GitRun('cherry-pick', nocommit, edit, signoff, attrib, shellescape(commit, 1))
+    let signoff = exists('a:2') && a:2 ? '--signoff' : ''
+    let attrib = exists('a:3') && a:3 ? '-x' : '-r'
+    call s:GitRun('cherry-pick', nocommit, signoff, attrib, shellescape(commit, 1))
     call s:GitGraphView()
 endfunction
 
-" a:1 = amend, a:2 = edit, a:3 = signoff, a:4 = message source: string/(f)ile/(c)ommit
+" a:1 = amend, a:2 = signoff, a:3 = message source: string/(f)ile/(c)ommit
 function! s:GitCommit(msg, ...)
     let amend = exists('a:1') && a:1 ? '--amend' : ''
-    let edit = exists('a:2') && a:2 ? '--edit' : ''
-    let signoff = exists('a:3') && a:3 ? '--signoff' : ''
-    let msgparam = exists('a:4') ? (a:4 == 'c' ? '-C' : (a:4 == 'f' ? '-F' : '-m')) : '-m'
-    call s:GitRun('commit', amend, edit, signoff, msgparam, shellescape(a:msg, 1))
+    let signoff = exists('a:2') && a:2 ? '--signoff' : ''
+    let msgparam = exists('a:3') ? (a:3 == 'c' ? '-C' : (a:3 == 'f' ? '-F' : '-m')) : '-m'
+    call s:GitRun('commit', amend, signoff, msgparam, shellescape(a:msg, 1))
     call s:GitGraphView()
 endfunction
 
@@ -836,10 +833,9 @@ function! s:GitCommitFiles(fname, msg, include, ...)
     let include = a:include ? '-i' : '-o'
     let files = s:ShellJoin(a:fname, ' ')
     let amend = exists('a:1') && a:1 ? '--amend' : ''
-    let edit = exists('a:2') && a:2 ? '--edit' : ''
-    let signoff = exists('a:3') && a:3 ? '--signoff' : ''
-    let msgparam = exists('a:4') ? (a:4 == 'c' ? '-C' : (a:4 == 'f' ? '-F' : '-m')) : '-m'
-    call s:GitRun('commit', amend, edit, signoff, msgparam, shellescape(a:msg, 1), include, '--', files)
+    let signoff = exists('a:2') && a:2 ? '--signoff' : ''
+    let msgparam = exists('a:3') ? (a:3 == 'c' ? '-C' : (a:3 == 'f' ? '-F' : '-m')) : '-m'
+    call s:GitRun('commit', amend, signoff, msgparam, shellescape(a:msg, 1), include, '--', files)
     call s:GitGraphView()
 endfunction
 
