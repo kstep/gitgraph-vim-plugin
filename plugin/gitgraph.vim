@@ -189,6 +189,7 @@ function! s:GitGraphMappings()
     command! -buffer -bang GitSVNFetch :call <SID>GitSVNFetch(<q-bang>=='!')
 
     command! -buffer -bang -count GitCommit :call <SID>GitCommitView(<SID>GetLineCommit('.'),<q-bang>=='!','c',<count>)
+    command! -buffer -bang GitReset :call <SID>GitReset(<SID>GetLineCommit('.'), <q-bang>=='!' ? 'h' : '')
 
     " (y)ank range into buffer and (r)ebase onto another branch
     map <buffer> Y :GitYankRange<cr>
@@ -201,6 +202,9 @@ function! s:GitGraphMappings()
     map <buffer> dW :GitDelete!<cr>
     map <buffer> dd :GitRevert<cr>
     map <buffer> DD :GitRevert!<cr>
+    " reset (hard) current HEAD
+    map <buffer> xx :GitReset<cr>
+    map <buffer> XX :GitReset!<cr>
 
     " (g)o (b)ranch, (p)ush, p(u)ll
     map <buffer> gp :GitPush<cr>
