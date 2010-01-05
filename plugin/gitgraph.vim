@@ -186,6 +186,7 @@ function! s:GitGraphMappings()
 
     command! -buffer GitSVNRebase :call <SID>GitSVNRebase(expand('<cword>'), <SID>GetSynName('.', '.'))
     command! -buffer GitSVNDcommit :call <SID>GitSVNDcommit(expand('<cword>'), <SID>GetSynName('.', '.'))
+    command! -buffer -bang GitSVNFetch :call <SID>GitSVNFetch(<q-bang>=='!')
 
     command! -buffer -bang -count GitCommit :call <SID>GitCommitView(<SID>GetLineCommit('.'),<q-bang>=='!','c',<count>)
 
@@ -223,6 +224,9 @@ function! s:GitGraphMappings()
     " like gu/gp, but for git-svn
     map <buffer> gU :GitSVNRebase<cr>
     map <buffer> gP :GitSVNDcommit<cr>
+    " fetch unfetched revisions from svn: (g)o (s)vn (parent only)
+    map <buffer> gs :GitSVNFetch<cr>
+    map <buffer> gS :GitSVNFetch!<cr>
 
     map <buffer> <Tab> :GitNextRef<cr>
     map <buffer> <S-Tab> :GitNextRef!<cr>
@@ -733,6 +737,13 @@ endfunction
 function! s:GitSVNDcommit(word, syng)
     call s:GitCheckout(a:word, a:syng)
     call s:GitRun('svn dcommit')
+    call s:GitGraphView()
+endfunction
+
+" a:1 = parent only
+function! s:GitSVNFetch(...)
+    let parent = exists('a:1') && a:1 ? '--parent' : ''
+    call s:GitRun('svn fetch', parent)
     call s:GitGraphView()
 endfunction
 
