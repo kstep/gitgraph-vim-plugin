@@ -632,7 +632,7 @@ function! s:GitDiffApply()
     let patchfile = tempname()
     try
         call writefile(hunks, patchfile)
-        call s:GitApply(patchfile, 1)
+        call s:GitApply(patchfile, 1, 1)
         setl nomod
     finally
         call delete(patchfile)
@@ -840,11 +840,12 @@ function! s:GitCommitFiles(fname, msg, include, ...)
     call s:GitGraphView()
 endfunction
 
-" a:1 = cached
+" a:1 = cached, a:2 = recount
 " TODO: check options
 function! s:GitApply(patch, ...)
     let cached = exists('a:1') && a:1 ? '--cached' : ''
-    call s:GitRun('apply', cached, '--', a:patch)
+    let recount = exists('a:2') && a:2 ? '--recount' : ''
+    call s:GitRun('apply', cached, recount, '--', a:patch)
     call s:GitStatusView()
 endfunction
 
