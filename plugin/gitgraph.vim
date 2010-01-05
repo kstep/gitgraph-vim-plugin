@@ -197,9 +197,10 @@ function! s:GitGraphMappings()
     map <buffer> R :GitRebaseOnto<cr>
     map <buffer> r :GitRebaseCurrent<cr>
 
-    " (d)elete (w)ord, commit (aka revert)
+    " (d)elete (w)ord: branch/tag/remote..., force with DW
     map <buffer> dw :GitDelete<cr>
-    map <buffer> dW :GitDelete!<cr>
+    map <buffer> DW :GitDelete!<cr>
+    " (d)elete commit, aka revert, (D)on't commit
     map <buffer> dd :GitRevert<cr>
     map <buffer> DD :GitRevert!<cr>
     " reset (hard) current HEAD
