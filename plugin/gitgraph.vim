@@ -407,7 +407,7 @@ endfunction
 
 " GitCommit view implementation {{{
 function! s:GitCommitView(msg, amend, src, signoff)
-    call s:Scratch('[Git Commit]', 'c', '1') | set ma
+    call s:Scratch('[Git Commit]', 'c', '1') | setl ma
 
     if a:src == 'c'
         let message = substitute(s:GitSys('cat-file', 'commit', a:msg), '^.\{-}\n\n', '', '')
@@ -448,7 +448,7 @@ function! s:GitCommitBuffer()
     let msgfile = tempname()
     call writefile(message, msgfile)
     try
-        call s:GitCommit(msgfile, b:gitgraph_commit_amend, b:gitgraph_commit_signoff, 'f') | set nomod
+        call s:GitCommit(msgfile, b:gitgraph_commit_amend, b:gitgraph_commit_signoff, 'f') | setl nomod
         if bufno >= 0 | exec 'bwipeout! '.bufno | endif
     finally
         call delete(msgfile)
@@ -461,10 +461,10 @@ endfunction
 function! s:GitStashView()
     let cmd = s:GitRead('stash list')
     call s:Scratch('[Git Stash]', 't', cmd)
-    set ma
+    setl ma
     silent! %s/^stash@{[0-9]\+}: //e
     silent! g/^\s*$/d
-    set noma nomod cul nowrap
+    setl noma nomod cul nowrap
     goto 1
 
     command! -buffer -bang GitStashApply :call <SID>GitStashApply(line('.')-1, <q-bang>=='!')
@@ -668,13 +668,13 @@ function! s:GitDiffDelete()
     let line = getline('.')
     let hunk = strpart(line, 0, 2)
     if hunk == '@@' " remove whole hunk
-        set ma | .,/^@@/-1delete | set noma
+        setl ma | .,/^@@/-1delete | setl noma
     elseif hunk == '++' || hunk == '--' " remove whole file
-        set ma | ?^---?,/^---/-1delete | set noma
+        setl ma | ?^---?,/^---/-1delete | setl noma
     elseif strpart(hunk, 0, 1) == '+' " remove added line
-        set ma | delete | set noma
+        setl ma | delete | setl noma
     elseif strpart(hunk, 0, 1) == '-' " remove removed line (make it context)
-        set ma | call setline('.', ' '.strpart(line, 1)) | set noma
+        setl ma | call setline('.', ' '.strpart(line, 1)) | setl noma
     endif
 endfunction
 
