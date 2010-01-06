@@ -626,10 +626,10 @@ function! s:GitDiffApply()
     try
         call writefile(hunks, patchfile)
         call s:GitApply(patchfile, 1, 1)
-        setl nomod
     finally
         call delete(patchfile)
     endtry
+    setl nomod
 endfunction
 
 function! s:GitDiffGotoFile()
@@ -661,7 +661,11 @@ function! s:GitDiffDelete()
     let line = getline('.')
     let hunk = strpart(line, 0, 2)
     if hunk == '@@' " remove whole hunk
-        setl ma | .,/^@@/-1delete | setl noma
+        try
+            setl ma | .,/^@@/-1delete | setl noma
+        catch /E493/
+            setl ma | .,$delete | setl noma
+        endtry
     elseif hunk == '++' || hunk == '--' " remove whole file
         setl ma | ?^---?,/^---/-1delete | setl noma
     elseif strpart(hunk, 0, 1) == '+' " remove added line
