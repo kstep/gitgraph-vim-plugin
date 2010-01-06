@@ -178,8 +178,8 @@ function! s:GitGraphMappings()
     command! -buffer GitBranch call <SID>GitBranch(<SID>GetLineCommit('.'), input("Enter new branch name: ")) | call <SID>GitGraphView()
 
     command! -buffer -bang GitTag call <SID>GitTag(<SID>GetLineCommit('.'), input("Enter new tag name: "), <q-bang>=='!') | call <SID>GitGraphView()
-    command! -buffer -bang GitSignedTag call <SID>GitCommitView(<SID>GetLineCommit('.'), 0, 'c', 1, 1) | call <SID>GitGraphView()
-    command! -buffer -bang GitAnnTag call <SID>GitCommitView(<SID>GetLineCommit('.'), 0, 'c', 0, 1) | call <SID>GitGraphView()
+    command! -buffer -bang GitSignedTag call <SID>GitCommitView(<SID>GetLineCommit('.'), 0, 'c', 1, 1)
+    command! -buffer -bang GitAnnTag call <SID>GitCommitView(<SID>GetLineCommit('.'), 0, 'c', 0, 1)
 
     command! -buffer -bang GitPush call <SID>GitPush(expand('<cword>'), <SID>GetSynName('.', '.'), <q-bang>=='!') | call <SID>GitGraphView()
     command! -buffer GitPull call <SID>GitPull(expand('<cword>'), <SID>GetSynName('.', '.')) | call <SID>GitGraphView()
@@ -418,10 +418,10 @@ function! s:GitCommitView(msg, amend, src, signoff, ...)
         let b:gitgraph_commit_hash = a:msg
         let tagmode = exists('a:1') ? a:1 : 0
         if tagmode
-            let message = message . "\n\nTag: " . (exists('a:2') && !empty(a:2) ? a:2 : '<enter tag name here>')
+            let message = message . "\nTag: " . (exists('a:2') && !empty(a:2) ? a:2 : '')
             let b:gitgraph_commit_tag = 1
             let b:gitgraph_commit_key = exists('a:3') ? a:3 : ''
-            call add(submessage, '## ⁰This is a '.(a:signoff ? 'signed ' : '').'tag commit.'.(empty(b:gitgraph_commit_key) ? '' : ' It will be signed with '.b:gitgraph_commit_key.' key.'))
+            call add(submessage, '## ⁰This is a '.(a:signoff ? 'signed ' : '').'tag commit.'.(empty(b:gitgraph_commit_key) ? '' : ' It will be signed with '.b:gitgraph_commit_key.' key.').' Please enter tag name on line with “Tag” above.')
         endif
     elseif a:src == 'f'
         let message = readfile(a:msg)
