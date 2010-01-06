@@ -386,13 +386,14 @@ function! s:GitStatusView()
     let cmd = 'lcd ' . repopath . ' | ' . s:GitRead('status')
     call s:Scratch('[Git Status:'.fnamemodify(repopath, ':t').']', 's', cmd)
     setl ma
-    silent! 1,/^#\( Changes\| Changed\| Untracked\)/-1delete
-    silent! g!/^#\( Changes\| Changed\| Untracked\|\t\|\s*$\)/delete
-    silent! g/^#\( Changes\| Changed\| Untracked\)/.+1delete
+    silent! 1,/^#\( Changes\| Changed\| Untracked\| Unmerged\)/-1delete
+    silent! g!/^#\( Changes\| Changed\| Untracked\| Unmerged\|\t\|\s*$\)/delete
+    silent! g/^#\( Changes\| Changed\| Untracked\| Unmerged\)/.+1delete
     silent! %s/^#\tmodified:   /\t[*] /e
     silent! %s/^#\tnew file:   /\t[+] /e
     silent! %s/^#\tdeleted:    /\t[-] /e
     silent! %s/^#\trenamed:    /\t[=] /e
+    silent! %s/^#\tboth modified:      /\t[?] /e
     silent! %s/^#\t/\t[ ] /e
     silent! %s/^#\s*$//e
     if has('perl') || has('perl/dyn')
