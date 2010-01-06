@@ -500,7 +500,7 @@ endfunction
 " GitStash view implementation {{{
 function! s:GitStashView()
     let cmd = s:GitRead('stash list')
-    call s:Scratch('[Git Stash]', 't', cmd)
+    call s:Scratch('[Git Stash:'.fnamemodify(s:GitGetRepository(), ':t').']', 't', cmd)
     setl ma
     silent! %s/^stash@{[0-9]\+}: //e
     silent! g/^\s*$/d
