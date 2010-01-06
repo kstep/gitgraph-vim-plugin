@@ -371,7 +371,7 @@ function! s:GitStatusMappings()
     command! -buffer -bang GitNextFile call <SID>GitStatusNextFile(<q-bang>==1)
     command! -buffer -range GitRevertFile call <SID>GitStatusRevertFile(<SID>GitStatusGetFiles(<line1>, <line2>), <SID>GetSynRegionName(<line1>, '.')) | call <SID>GitStatusView()
     command! -buffer -range GitAddFile call <SID>GitStatusAddFile(<SID>GitStatusGetFilesDict(<line1>, <line2>), <SID>GetSynRegionName(<line1>, '.')) | call <SID>GitStatusView()
-    command! -buffer -range GitDiff call <SID>GitDiff('HEAD', 'HEAD', <SID>GetSynRegionName('.', '.') ==# 'gitStaged', <SID>GitStatusGetFiles(<line1>, <line2>))
+    command! -buffer -range GitDiff call <SID>GitDiff('', '', <SID>GetSynRegionName('.', '.') ==# 'gitStaged', <SID>GitStatusGetFiles(<line1>, <line2>))
 
     map <buffer> <Tab> :GitNextFile<cr>
     map <buffer> <S-Tab> :GitNextFile!<cr>
@@ -665,13 +665,11 @@ endfunction
 
 " a:1 = cached, a:2 = files, a:3 = context lines
 function! s:GitDiff(fcomm, tcomm, ...)
-    if !empty(a:fcomm) && !empty(a:tcomm)
-        let cached = exists('a:1') && a:1 ? '--cached' : ''
-        let paths = exists('a:2') && !empty(a:2) ? s:ShellJoin(a:2, ' ') : ''
-        let ctxl = exists('a:3') ? '-U'.a:3 : ''
-        let cmd = s:GitRead('diff', cached, ctxl, a:tcomm, a:fcomm != a:tcomm ? a:fcomm : '', '--', paths)
-        call s:GitDiffBuffer('[Git Diff]', cmd)
-    endif
+    let cached = exists('a:1') && a:1 ? '--cached' : ''
+    let paths = exists('a:2') && !empty(a:2) ? s:ShellJoin(a:2, ' ') : ''
+    let ctxl = exists('a:3') ? '-U'.a:3 : ''
+    let cmd = s:GitRead('diff', cached, ctxl, a:tcomm, a:fcomm != a:tcomm ? a:fcomm : '', '--', paths)
+    call s:GitDiffBuffer('[Git Diff]', cmd)
 endfunction
 
 function! s:GitDiffApply()
