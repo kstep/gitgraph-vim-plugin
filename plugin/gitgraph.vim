@@ -689,16 +689,16 @@ endfunction
 function! s:GitDiffGotoFile()
     " get header position
     let hdrpos = search('^+++ ', 'nbW')
-    if hdrpos < 1 | return "0" | endif
+    if hdrpos < 1 | return | endif
     let chdrpos = search('^@@ ', 'nbW')
-    if chdrpos < 1 | return "1" | endif
+    if chdrpos < 1 | return | endif
 
     " now get chunk position in original file
-    let chunkpos = matchstr(getline(chdrpos), '[0-9]\+', 3)
-    if empty(chunkpos) | return chdrpos | endif
+    let chunkpos = matchlist(getline(chdrpos), '+\([0-9]\+\),')[1]
+    if empty(chunkpos) | return | endif
 
     " now get diff lines present in current file from header to current pos
-    let offlines = filter(getbufline('%', chdrpos+1, line('.')), 'v:val =~ "^[ +]"')
+    let offlines = filter(getbufline('%', chdrpos+2, line('.')), 'v:val =~ "^[ +]"')
 
     " and original file name from header
     let origfile = strpart(getline(hdrpos), 5)
