@@ -189,7 +189,7 @@ function! s:GitGraphMappings()
     command! -buffer GitSVNDcommit call <SID>GitSVNDcommit(expand('<cword>'), <SID>GetSynName('.', '.')) | call <SID>GitGraphView()
     command! -buffer -bang GitSVNFetch call <SID>GitSVNFetch(<q-bang>=='!') | call <SID>GitGraphView()
 
-    command! -buffer -bang -count GitCommit call <SID>GitCommitView(<SID>GetLineCommit('.'),<q-bang>=='!','c',<count>)
+    command! -buffer -bang -count GitCommit call <SID>GitCommitView(<SID>GetLineCommit('.'), <q-bang>=='!', 'c', <count>)
     command! -buffer -bang GitReset call <SID>GitReset(<SID>GetLineCommit('.'), <q-bang>=='!' ? 'h' : '') | call <SID>GitGraphView()
 
     " (y)ank range into buffer and (r)ebase onto another branch
@@ -560,19 +560,22 @@ function! s:GitGraphInit()
 
     command! -nargs=* -complete=custom,<SID>GitBranchCompleter GitGraph call <SID>GitGraphView(<f-args>)
     command! GitStatus call <SID>GitStatusView()
-    command! -bang -count -nargs=? GitCommit call <SID>GitCommitView(<q-args>,<q-bang>=='!','',<count>)
-    command! -bang -count=3 GitDiff call <SID>GitDiff('HEAD','HEAD',<q-bang>=='!',expand('%:p'),<q-count>)
+    command! -bang -count -nargs=? GitCommit call <SID>GitCommitView(<q-args>, <q-bang>=='!', '', <count>)
+    command! -bang -count=3 GitDiff call <SID>GitDiff('HEAD', 'HEAD', <q-bang>=='!', expand('%:p'), <q-count>)
     command! GitStash call <SID>GitStashView()
     command! GitStashSave call <SID>GitStashSave(input('Stash message: '))
+    command! GitAddFile call <SID>GitAddFiles(expand('%:p'))
 
     command! GitLayout call <SID>GitLayout()
 
     map ,gg :GitGraph "--all"<cr>
     map ,gs :GitStatus<cr>
     map ,gc :GitCommit<cr>
+    map ,gC :GitCommit!<cr>
     map ,gd :GitDiff<cr>
     map ,gt :GitStash<cr>
-    map ,ga :GitStashSave<cr>
+    map ,ga :GitAddFile<cr>
+    map ,gA :GitStashSave<cr>
     map ,gf :exec 'GitGraph "--all" 0 '.expand('%:p')<cr>
 
     map ,go :GitLayout<cr>
