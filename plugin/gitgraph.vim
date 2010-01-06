@@ -176,9 +176,10 @@ function! s:GitGraphMappings()
     command! -buffer -bang GitDelete call <SID>GitDelete(expand('<cword>'), <SID>GetSynName('.', '.'), <q-bang>=='!') | call <SID>GitGraphView()
     command! -buffer -bang GitRevert call <SID>GitRevert(<SID>GetLineCommit('.'), <q-bang>=='!') | call <SID>GitGraphView()
     command! -buffer GitBranch call <SID>GitBranch(<SID>GetLineCommit('.'), input("Enter new branch name: ")) | call <SID>GitGraphView()
-    command! -buffer GitTag call <SID>GitTag(<SID>GetLineCommit('.'), input("Enter new tag name: ")) | call <SID>GitGraphView()
-    command! -buffer GitSignedTag call <SID>GitTag(<SID>GetLineCommit('.'), input("Enter new tag name: "), "s") | call <SID>GitGraphView()
-    command! -buffer GitAnnTag call <SID>GitTag(<SID>GetLineCommit('.'), input("Enter new tag name: "), "a") | call <SID>GitGraphView()
+
+    command! -buffer -bang GitTag call <SID>GitTag(<SID>GetLineCommit('.'), input("Enter new tag name: "), <q-bang>=='!') | call <SID>GitGraphView()
+    command! -buffer -bang GitSignedTag call <SID>GitCommitView(<SID>GetLineCommit('.'), 0, 'c', 1, 1) | call <SID>GitGraphView()
+    command! -buffer -bang GitAnnTag call <SID>GitCommitView(<SID>GetLineCommit('.'), 0, 'c', 0, 1) | call <SID>GitGraphView()
 
     command! -buffer -bang GitPush call <SID>GitPush(expand('<cword>'), <SID>GetSynName('.', '.'), <q-bang>=='!') | call <SID>GitGraphView()
     command! -buffer GitPull call <SID>GitPull(expand('<cword>'), <SID>GetSynName('.', '.')) | call <SID>GitGraphView()
@@ -404,11 +405,23 @@ endfunction
 " }}}
 
 " GitCommit view implementation {{{
-function! s:GitCommitView(msg, amend, src, signoff)
+" a:1 = tag mode, a:2 = tagname, a:3 = key id
+function! s:GitCommitView(msg, amend, src, signoff, ...)
     call s:Scratch('[Git Commit]', 'c', '1') | setl ma
+
+    let tagmode = 0
+    let submessage = []
 
     if a:src == 'c'
         let message = substitute(s:GitSys('cat-file', 'commit', a:msg), '^.\{-}\n\n', '', '')
+        let b:gitgraph_commit_hash = a:msg
+        let tagmode = exists('a:1') ? a:1 : 0
+        if tagmode
+            let message = message . "\n\nTag: " . (exists('a:2') && !empty(a:2) ? a:2 : '<enter tag name here>')
+            let b:gitgraph_commit_tag = 1
+            let b:gitgraph_commit_key = exists('a:3') ? a:3 : ''
+            call add(submessage, '## ⁰This is a '.(a:signoff ? 'signed ' : '').'tag commit.'.(empty(b:gitgraph_commit_key) ? '' : ' It will be signed with '.b:gitgraph_commit_key.' key.'))
+        endif
     elseif a:src == 'f'
         let message = readfile(a:msg)
     elseif a:amend && empty(a:msg)
@@ -418,39 +431,67 @@ function! s:GitCommitView(msg, amend, src, signoff)
     endif
 
     silent 0put =message
+
     silent put ='## -------------------------------------------------------------------------------------'
     silent put ='## Enter commit message here. Write it (:w) to commit or close the buffer (:q) to cancel.'
     silent put ='## Lines starting with ## are removed from commit message.'
 
-    let submessage = ''
-    if a:amend | let submessage = submessage . '¹This is an amend commit. ' | endif
-    if a:signoff | let submessage = submessage . '²This commit will be signed off with your signature. ' | endif
-    if !empty(submessage)
-        silent put ='## '.submessage
-    endif
+    if a:amend | call add(submessage, '## ¹This is an amend commit on top of current branch.') | endif
+    if a:signoff && !tagmode | call add(submessage, '## ²This commit will be signed off with your signature.') | endif
 
-    1
+    if !empty(submessage)
+        silent put =submessage
+    endif
 
     setl ft=gitcommit bt=acwrite bh=wipe nomod
     let b:gitgraph_commit_amend = a:amend
     let b:gitgraph_commit_signoff = a:signoff
+    goto 1
     augroup GitCommitView
         au!
-        au BufWriteCmd <buffer> call s:GitCommitBuffer()
+        if empty(tagmode)
+            au BufWriteCmd <buffer> call s:GitCommitBuffer()
+        else
+            au BufWriteCmd <buffer> call s:GitTagBuffer()
+        endif
     augroup end
+endfunction
+
+function! s:GetMessageBuffer(buf)
+    let message = filter(getbufline(a:buf, 1, '$'), 'strpart(v:val, 0, 2) != "##"')
+    return message
 endfunction
 
 function! s:GitCommitBuffer()
     let bufno = bufnr('%')
-    let message = filter(getbufline('%', 1, '$'), 'strpart(v:val, 0, 2) != "##"')
     let msgfile = tempname()
-    call writefile(message, msgfile)
+    call writefile(s:GetMessageBuffer(bufno), msgfile)
     try
-        call s:GitCommit(msgfile, b:gitgraph_commit_amend, b:gitgraph_commit_signoff, 'f') | setl nomod
+        call s:GitCommit(msgfile, b:gitgraph_commit_amend, b:gitgraph_commit_signoff, 'f')
         if bufno >= 0 | exec 'bwipeout! '.bufno | endif
     finally
         call delete(msgfile)
     endtry
+    setl nomod
+endfunction
+
+function! s:GitTagBuffer()
+    let bufno = bufnr('%')
+    let message = s:GetMessageBuffer(bufno)
+    let tagline = filter(copy(message), 'v:val =~ "^Tag: "')
+    if empty(tagline) | return | endif
+    let tagname = matchstr(tagline[0], '\h\w*', 5)
+    if empty(tagname) | return | endif
+
+    let msgfile = tempname()
+    call writefile(message, msgfile)
+    try
+        call s:GitTag(b:gitgraph_commit_hash, tagname, 0, b:gitgraph_commit_signoff ? 's' : 'a', msgfile, 1, b:gitgraph_commit_key)
+        if bufno >= 0 | exec 'bwipeout! '.bufno | endif
+    finally
+        call delete(msgfile)
+    endtry
+    setl nomod
 endfunction
 " }}}
 
@@ -574,18 +615,27 @@ function! s:GitBranch(commit, branch)
     endif
 endfunction
 
-" a:1 - mode (none/'a'/'s'), a:1 - key id
+" a:1 = force, a:2 = mode (none/'a'/'s'), a:3 = message, a:4 = from file, a:5 = key id
 function! s:GitTag(commit, tag, ...)
     if !empty(a:tag)
         let mode = ''
-        if exists('a:1')
-            if a:1 ==# 'a'
+        if exists('a:2')
+            if a:2 ==# 'a'
                 let mode = '-a'
-            elseif a:1 ==# 's'
-                let mode = exists('a:2') && !empty(a:2) ? '-u '.a:2 : '-s'
+            elseif a:2 ==# 's'
+                let mode = exists('a:5') && !empty(a:5) ? '-u '.a:5 : '-s'
             endif
         endif
-        call s:GitRun('tag', mode, shellescape(a:tag, 1), a:commit)
+        if empty(mode)
+            let source = ''
+            let message = ''
+        else
+            if !exists('a:3') || empty(a:3) | return | endif
+            let source = exists('a:4') && a:4 ? '-F' : '-m'
+            let message = shellescape(a:3, 1)
+        endif
+        let force = exists('a:1') && a:1 ? '--force' : ''
+        call s:GitRun('tag', force, mode, source, message, shellescape(a:tag, 1), a:commit)
     endif
 endfunction
 
