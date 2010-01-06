@@ -1,0 +1,225 @@
+*gitgraph.txt*	GitGraph Vim plugin manual.
+
+==============================================================================
+1. Contents						*gitgraph-contents* {{{1
+
+1.  Contents........................................|gitgraph-contents|
+2.  About GitGraph plugin...........................|gitgraph-about|
+3.  Views overview..................................|gitgraph-views|
+4.  Global bindings.................................|gitgraph-bindings|
+4.1.  Mappings......................................|gitgraph-mappings|
+4.2.  Commands......................................|gitgraph-commands|
+5.  Graph view......................................|gitgraph-graph-view|
+5.1.  Mappings......................................|gitgraph-graph-mappings|
+5.2.  Commands......................................|gitgraph-graph-commands|
+6.  Status view.....................................|gitgraph-status-view|
+6.1.  Mappings......................................|gitgraph-status-mappings|
+6.2.  Commands......................................|gitgraph-status-commands|
+7.  Commit view.....................................|gitgraph-commit-view|
+7.1.  Mappings......................................|gitgraph-commit-mappings|
+7.2.  Commands......................................|gitgraph-commit-commands|
+8.  Diff view.......................................|gitgraph-diff-view|
+8.1.  Mappings......................................|gitgraph-diff-mappings|
+8.2.  Commands......................................|gitgraph-diff-commands|
+9.  Stash view......................................|gitgraph-stash-view|
+9.1.  Mappings......................................|gitgraph-stash-mappings|
+9.2.  Commands......................................|gitgraph-stash-commands|
+10. Views layouts...................................|gitgraph-layouts|
+11. Available options...............................|gitgraph-options|
+12. Todo list.......................................|gitgraph-todo|
+13. Authorship and legal notices....................|gitgraph-author|
+
+==============================================================================
+2. About GitGraph plugin				*gitgraph-about* {{{1
+
+GitGraph plugin provides tight integration with git revision control system.
+If you are not familiar with git, maybe this plugin is just not for you.
+If you are using git, you might like some or all of the plugin's features.
+
+This plugin implements a lot of git interface features, some of them might be
+dangerous in hands of naive user (like rebase or reset features), so don't use
+them unless you know what you are doing. If you meet some git feature you
+don't know about, consult git man pages and other available documentation
+(there're a plenty of them on the Internet, just use Google in case you don't
+know where to start).
+
+The plugin started as a wrapper around “git log --graph” command to display
+git graph in vim, and thus it was given its name. But during my work I found a
+lot of things lacking, which might prove useful and time-saving for developer
+(and I'm one, so this plugin is written by developer and for developers).
+For example I missed ability to commit changes in separate hunks, so I
+implemented it as GitGraph feature.
+
+Below I will describe many features, implemented in this version of GitGraph.
+Hope, you find this plugin useful in your daily work: I tried hard to make it
+good instrument for developers.
+
+Please, feel free to email me in case you found a bug or have a new feature in
+your mind. In case of bug reports, please provide full description of a bug
+and a way to reproduce it.
+
+Email me at kstep@p-nut.info.
+
+==============================================================================
+3. Views overview					*gitgraph-views* {{{1
+
+The plugin provides a number of different views to communicate with git, each
+full with its own context commands and mappings for different actions specific
+(and possible) in it.
+
+There're a total of five views. Here they are in order of appearance:
+
+	- Graph view |gitgraph-graph-view|, the main one. Displays git
+	  repository's history as a graph using “git log --graph” command
+	  internally. Use |:GitGraph| command or “,gg” mapping
+	  |gitgraph-mappings-gg| to invoke it. Provides a lot of commands to
+	  work with git's history.
+
+	- Status view |gitgraph-status-view|. Displays current git repository
+	  status: staged, unstaged and untracked files. You can stage/unstage
+	  files from it, view diffs and remove untracked files. Use
+	  |:GitStatus| command or “,gs” mapping |gitgraph-mappings-gs| to
+	  invoke it.
+
+	- Commit view |gitgraph-commit-view|. Provides you with a way to enter
+	  message and commit changes, selected in Status view. Use
+	  |:GitCommit| command or “,gc” mapping |gitgraph-mappings-gc| to
+	  invoke it.
+	  There're other ways to invoke it from Graph view to amend commit or
+	  pick message from other commit to edit, see |gitgraph-graph-view|
+	  for details.
+	  Write this buffer with |:write| command when you are finished with
+	  commit message in order to commit, or close it with |:quit| command
+	  to cancel.
+
+	- Diff view |gitgraph-diff-view|. This view provides nice diff view
+	  with changes in current file in working copy vs. index, and allows
+	  you to choose concrete hunks and even lines to stage. Use |:GitDiff|
+	  command or “,gd” mapping |gitgraph-mappings-gd| to open it.
+	  There're other ways to invoke it from Status and Graph views to view
+	  commit diffs and staged/unstaged diffs, although not all of them are
+	  fully functional: e.g. you can't easily apply diff from old commit
+	  for obvious reasons.
+
+	- Stash view |gitgraph-stash-view|. It provides you with a stack-like
+	  stash list. Here you can review your stashes and drop or apply some
+	  of them. Use |:GitStash| command or “,gt” mapping
+	  |gitgraph-mappings-gt| to open it.
+	  To save changes into stash use |:GitStashSave| command or “,ga”
+	  mapping |gitgraph-mappings-ga|.
+	  You will be prompted with a message, just hit <Enter> for default.
+
+There's actually one more view: Show view, which opens from Graph view with
+“gf” mapping |gitgraph-graph-mappings-gf| with extended info about concrete
+commit like commit full message, date of commit and committer name, but it
+neither differs from Diff view very much, nor provides any special commands as
+you can't do much with concrete commit, so just take it as a kind of really
+restricted Diff view with extended commit info.
+
+==============================================================================
+4. Global bindings					*gitgraph-bindings* {{{1
+
+There're a number of mappings and commands the plugin exports to global
+environment. They are mostly provide ways to open views and do some things not
+connected to any view as so available from any place of vim while editing
+files.
+
+Some of them were mentioned in |gitgraph-views|, but this section describes
+all of them.
+
+4.1. Global mappings					*gitgraph-mappings* {{{2
+
+TODO
+
+4.2. Global commands					*gitgraph-commands* {{{2
+
+TODO
+
+==============================================================================
+5. Graph view						*gitgraph-graph-view* {{{1
+
+TODO
+
+5.1. Graph view mappings				*gitgraph-graph-mappings* {{{2
+
+TODO
+
+5.2. Graph view commands				*gitgraph-graph-commands* {{{2
+
+TODO
+
+==============================================================================
+6. Status view						*gitgraph-status-view* {{{1
+
+TODO
+
+6.1. Status view mappings				*gitgraph-status-mappings* {{{2
+
+TODO
+
+6.2. Status view commands				*gitgraph-status-commands* {{{2
+
+TODO
+
+==============================================================================
+7. Commit view						*gitgraph-commit-view* {{{1
+
+TODO
+
+7.1. Commit view mappings				*gitgraph-commit-mappings* {{{2
+
+TODO
+
+7.2. Commit view commands				*gitgraph-commit-commands* {{{2
+
+TODO
+
+==============================================================================
+8. Diff view						*gitgraph-diff-view* {{{1
+
+TODO
+
+8.1. Diff view mappings					*gitgraph-diff-mappings* {{{2
+
+TODO
+
+8.2. Diff view commands					*gitgraph-diff-commands* {{{2
+
+TODO
+
+==============================================================================
+9. Stash view						*gitgraph-stash-view* {{{1
+
+TODO
+
+9.1. Stash view mappings				*gitgraph-stash-mappings* {{{2
+
+TODO
+
+9.2. Stash view commands				*gitgraph-stash-commands* {{{2
+
+TODO
+
+==============================================================================
+10. Views layouts					*gitgraph-layouts* {{{1
+
+TODO
+
+==============================================================================
+11. Available options					*gitgraph-options* {{{1
+
+TODO
+
+==============================================================================
+12. Todo list						*gitgraph-todo* {{{1
+
+TODO
+
+==============================================================================
+13. Authorship and legal notices			*gitgraph-author* {{{1
+
+TODO
+
+
+ vim:tw=78:ts=8:ft=help:norl:
+
