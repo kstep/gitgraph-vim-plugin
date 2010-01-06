@@ -678,7 +678,7 @@ function! s:GitDiffApply()
     let patchfile = tempname()
     try
         call writefile(hunks, patchfile)
-        call s:GitApply(patchfile, 1, 1)
+        call s:GitApply(patchfile, 1, 0)
     finally
         call delete(patchfile)
     endtry
@@ -880,12 +880,13 @@ function! s:GitCommitFiles(fname, msg, include, ...)
     call s:GitRun('commit', amend, signoff, msgparam, shellescape(a:msg, 1), include, '--', files)
 endfunction
 
-" a:1 = cached, a:2 = recount
+" a:1 = cached, a:2 = reverse, a:3 = recount
 " TODO: check options
 function! s:GitApply(patch, ...)
     let cached = exists('a:1') && a:1 ? '--cached' : ''
-    let recount = exists('a:2') && a:2 ? '--recount' : ''
-    call s:GitRun('apply', cached, recount, '--', a:patch)
+    let reverse = exists('a:2') && a:2 ? '--reverse' : ''
+    let recount = exists('a:3') && a:3 ? '--recount' : ''
+    call s:GitRun('apply', cached, reverse, recount, '--', a:patch)
 endfunction
 
 " a:1 = remove stash after apply, a:2 = apply index
