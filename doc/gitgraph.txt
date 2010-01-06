@@ -80,6 +80,10 @@ There're a total of five views. Here they are in order of appearance:
 	  files from it, view diffs and remove untracked files. Use
 	  |:GitStatus| command or “,gs” mapping |gitgraph-mappings-gs| to
 	  invoke it.
+	  Use “yy” mapping |gitgraph-status-mappings-yy| to stage file, “dd”
+	  mapping |gitgraph-status-mappings-dd| to unstage file (or delete
+	  untracked one) and “gd” mapping |gitgraph-status-mappings-gd| to
+	  view file's diff.
 
 	- Commit view |gitgraph-commit-view|. Provides you with a way to enter
 	  message and commit changes, selected in Status view. Use
@@ -100,6 +104,11 @@ There're a total of five views. Here they are in order of appearance:
 	  commit diffs and staged/unstaged diffs, although not all of them are
 	  fully functional: e.g. you can't easily apply diff from old commit
 	  for obvious reasons.
+	  Use “gf” mapping |gitgraph-diff-mappings-gf| in it to go to original
+	  file's position and “dd” mapping |gitgraph-diff-mappings-dd| to
+	  remove line, hunk or whole file from diff to prepare it to custom
+	  apply operation. If changed, use |:write| command to apply modified
+	  diff as a patch into index, so it will be available for commit.
 
 	- Stash view |gitgraph-stash-view|. It provides you with a stack-like
 	  stash list. Here you can review your stashes and drop or apply some
