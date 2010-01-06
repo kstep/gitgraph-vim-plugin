@@ -507,8 +507,8 @@ function! s:GitStashView()
     setl noma nomod cul nowrap
     goto 1
 
-    command! -buffer -bang GitStashApply call <SID>GitStashApply(line('.')-1, <q-bang>=='!') | call GitStashView()
-    command! -buffer GitStashRemove call <SID>GitStashRemove(line('.')-1) | call GitStashView()
+    command! -buffer -bang GitStashApply call <SID>GitStashApply(line('.')-1, <q-bang>=='!') | call <SID>GitStashView()
+    command! -buffer GitStashRemove call <SID>GitStashRemove(line('.')-1) | call <SID>GitStashView()
     command! -buffer -count=3 GitStashDiff call <SID>GitStashDiff(line('.')-1, <q-count>)
 
     map <buffer> dd :GitStashRemove<CR>
