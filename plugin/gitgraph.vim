@@ -165,31 +165,31 @@ endfunction
 
 " GitGraph view implementation {{{
 function! s:GitGraphMappings()
-    command! -buffer -range GitYankRange :call setreg(v:register, <SID>GetLineCommit(<line1>)."\n".<SID>GetLineCommit(<line2>), "l")
-    command! -buffer -bang -range GitRebase :call <SID>GitRebase(<SID>GetLineCommit(<line1>), <SID>GetLineCommit(<line2>), '', <q-bang>=='!')
-    command! -buffer -bang GitRebaseOnto :let rng = <SID>GetRegCommit(v:register) | call <SID>GitRebase(rng[0], rng[1], <SID>GetLineCommit('.'), <q-bang>=='!')
-    command! -buffer -bang GitRebaseCurrent :call <SID>GitRebase('', <SID>GetLineCommit('.'), '', <q-bang>=='!')
-    command! -buffer -bang -nargs=* -range GitDiff :call <SID>GitDiff(<SID>GetLineCommit(<line1>), <SID>GetLineCommit(<line2>), <q-bang>=='!', <f-args>)
-    command! -buffer GitShow :call <SID>GitShow(<SID>GetLineCommit('.'))
-    command! -buffer -bang GitNextRef :call <SID>GitGraphNextRef(<q-bang>=='!')
+    command! -buffer -range GitYankRange call setreg(v:register, <SID>GetLineCommit(<line1>)."\n".<SID>GetLineCommit(<line2>), "l")
+    command! -buffer -bang -range GitRebase call <SID>GitRebase(<SID>GetLineCommit(<line1>), <SID>GetLineCommit(<line2>), '', <q-bang>=='!') | call <SID>GitGraphView()
+    command! -buffer -bang GitRebaseOnto :let rng = <SID>GetRegCommit(v:register) | call <SID>GitRebase(rng[0], rng[1], <SID>GetLineCommit('.'), <q-bang>=='!') | call <SID>GitGraphView()
+    command! -buffer -bang GitRebaseCurrent call <SID>GitRebase('', <SID>GetLineCommit('.'), '', <q-bang>=='!') | call <SID>GitGraphView()
+    command! -buffer -bang -nargs=* -range GitDiff call <SID>GitDiff(<SID>GetLineCommit(<line1>), <SID>GetLineCommit(<line2>), <q-bang>=='!', <f-args>)
+    command! -buffer GitShow call <SID>GitShow(<SID>GetLineCommit('.'))
+    command! -buffer -bang GitNextRef call <SID>GitGraphNextRef(<q-bang>=='!')
 
-    command! -buffer -bang GitDelete :call <SID>GitDelete(expand('<cword>'), <SID>GetSynName('.', '.'), <q-bang>=='!')
-    command! -buffer -bang GitRevert :call <SID>GitRevert(<SID>GetLineCommit('.'), <q-bang>=='!')
-    command! -buffer GitBranch :call <SID>GitBranch(<SID>GetLineCommit('.'), input("Enter new branch name: "))
-    command! -buffer GitTag :call <SID>GitTag(<SID>GetLineCommit('.'), input("Enter new tag name: "))
-    command! -buffer GitSignedTag :call <SID>GitTag(<SID>GetLineCommit('.'), input("Enter new tag name: "), "s")
-    command! -buffer GitAnnTag :call <SID>GitTag(<SID>GetLineCommit('.'), input("Enter new tag name: "), "a")
+    command! -buffer -bang GitDelete call <SID>GitDelete(expand('<cword>'), <SID>GetSynName('.', '.'), <q-bang>=='!') | call <SID>GitGraphView()
+    command! -buffer -bang GitRevert call <SID>GitRevert(<SID>GetLineCommit('.'), <q-bang>=='!') | call <SID>GitGraphView()
+    command! -buffer GitBranch call <SID>GitBranch(<SID>GetLineCommit('.'), input("Enter new branch name: ")) | call <SID>GitGraphView()
+    command! -buffer GitTag call <SID>GitTag(<SID>GetLineCommit('.'), input("Enter new tag name: ")) | call <SID>GitGraphView()
+    command! -buffer GitSignedTag call <SID>GitTag(<SID>GetLineCommit('.'), input("Enter new tag name: "), "s") | call <SID>GitGraphView()
+    command! -buffer GitAnnTag call <SID>GitTag(<SID>GetLineCommit('.'), input("Enter new tag name: "), "a") | call <SID>GitGraphView()
 
-    command! -buffer -bang GitPush :call <SID>GitPush(expand('<cword>'), <SID>GetSynName('.', '.'), <q-bang>=='!')
-    command! -buffer GitPull :call <SID>GitPull(expand('<cword>'), <SID>GetSynName('.', '.'))
-    command! -buffer GitCheckout :call <SID>GitCheckout(expand('<cword>'), <SID>GetSynName('.', '.'))
+    command! -buffer -bang GitPush call <SID>GitPush(expand('<cword>'), <SID>GetSynName('.', '.'), <q-bang>=='!') | call <SID>GitGraphView()
+    command! -buffer GitPull call <SID>GitPull(expand('<cword>'), <SID>GetSynName('.', '.')) | call <SID>GitGraphView()
+    command! -buffer GitCheckout call <SID>GitCheckout(expand('<cword>'), <SID>GetSynName('.', '.')) | call <SID>GitGraphMarkHead()
 
-    command! -buffer GitSVNRebase :call <SID>GitSVNRebase(expand('<cword>'), <SID>GetSynName('.', '.'))
-    command! -buffer GitSVNDcommit :call <SID>GitSVNDcommit(expand('<cword>'), <SID>GetSynName('.', '.'))
-    command! -buffer -bang GitSVNFetch :call <SID>GitSVNFetch(<q-bang>=='!')
+    command! -buffer GitSVNRebase call <SID>GitSVNRebase(expand('<cword>'), <SID>GetSynName('.', '.')) | call <SID>GitGraphView()
+    command! -buffer GitSVNDcommit call <SID>GitSVNDcommit(expand('<cword>'), <SID>GetSynName('.', '.')) | call <SID>GitGraphView()
+    command! -buffer -bang GitSVNFetch call <SID>GitSVNFetch(<q-bang>=='!') | call <SID>GitGraphView()
 
-    command! -buffer -bang -count GitCommit :call <SID>GitCommitView(<SID>GetLineCommit('.'),<q-bang>=='!','c',<count>)
-    command! -buffer -bang GitReset :call <SID>GitReset(<SID>GetLineCommit('.'), <q-bang>=='!' ? 'h' : '')
+    command! -buffer -bang -count GitCommit call <SID>GitCommitView(<SID>GetLineCommit('.'),<q-bang>=='!','c',<count>)
+    command! -buffer -bang GitReset call <SID>GitReset(<SID>GetLineCommit('.'), <q-bang>=='!' ? 'h' : '') | call <SID>GitGraphView()
 
     " (y)ank range into buffer and (r)ebase onto another branch
     map <buffer> Y :GitYankRange<cr>
@@ -348,7 +348,6 @@ function! s:GitStatusRevertFile(fname, region)
     else
         return
     endif
-    call s:GitStatusView()
 endfunction
 
 function! s:GitStatusAddFile(fname, region)
@@ -365,14 +364,13 @@ function! s:GitStatusAddFile(fname, region)
     else
         return
     endif
-    call s:GitStatusView()
 endfunction
 
 function! s:GitStatusMappings()
-    command! -buffer -bang GitNextFile :call <SID>GitStatusNextFile(<q-bang>==1)
-    command! -buffer -range GitRevertFile :call <SID>GitStatusRevertFile(<SID>GitStatusGetFiles(<line1>, <line2>), <SID>GetSynRegionName(<line1>, '.'))
-    command! -buffer -range GitAddFile :call <SID>GitStatusAddFile(<SID>GitStatusGetFilesDict(<line1>, <line2>), <SID>GetSynRegionName(<line1>, '.'))
-    command! -buffer -range GitDiff :call <SID>GitDiff('HEAD', 'HEAD', <SID>GetSynRegionName('.', '.') ==# 'gitStaged', <SID>GitStatusGetFiles(<line1>, <line2>))
+    command! -buffer -bang GitNextFile call <SID>GitStatusNextFile(<q-bang>==1)
+    command! -buffer -range GitRevertFile call <SID>GitStatusRevertFile(<SID>GitStatusGetFiles(<line1>, <line2>), <SID>GetSynRegionName(<line1>, '.')) | call <SID>GitStatusView()
+    command! -buffer -range GitAddFile call <SID>GitStatusAddFile(<SID>GitStatusGetFilesDict(<line1>, <line2>), <SID>GetSynRegionName(<line1>, '.')) | call <SID>GitStatusView()
+    command! -buffer -range GitDiff call <SID>GitDiff('HEAD', 'HEAD', <SID>GetSynRegionName('.', '.') ==# 'gitStaged', <SID>GitStatusGetFiles(<line1>, <line2>))
 
     map <buffer> <Tab> :GitNextFile<cr>
     map <buffer> <S-Tab> :GitNextFile!<cr>
@@ -453,7 +451,6 @@ function! s:GitCommitBuffer()
     finally
         call delete(msgfile)
     endtry
-    call s:GitStatusView()
 endfunction
 " }}}
 
@@ -467,9 +464,9 @@ function! s:GitStashView()
     setl noma nomod cul nowrap
     goto 1
 
-    command! -buffer -bang GitStashApply :call <SID>GitStashApply(line('.')-1, <q-bang>=='!')
-    command! -buffer GitStashRemove :call <SID>GitStashRemove(line('.')-1)
-    command! -buffer -count=3 GitStashDiff :call <SID>GitStashDiff(line('.')-1, <count>)
+    command! -buffer -bang GitStashApply call <SID>GitStashApply(line('.')-1, <q-bang>=='!') | call GitStashView()
+    command! -buffer GitStashRemove call <SID>GitStashRemove(line('.')-1) | call GitStashView()
+    command! -buffer -count=3 GitStashDiff call <SID>GitStashDiff(line('.')-1, <count>)
 
     map <buffer> dd :GitStashRemove<CR>
     map <buffer> yy :GitStashApply<CR>
@@ -520,14 +517,14 @@ function! s:GitGraphInit()
     let s:gitgraph_git_path = g:gitgraph_git_path
     let s:gitgraph_graph_format = shellescape('%Creset%h%d ' . g:gitgraph_subject_format . ' [' . g:gitgraph_authorship_format . ']', 1)
 
-    command! -nargs=* -complete=custom,<SID>GitBranchCompleter GitGraph :call <SID>GitGraphView(<f-args>)
-    command! GitStatus :call <SID>GitStatusView()
-    command! -bang -count -nargs=? GitCommit :call <SID>GitCommitView(<q-args>,<q-bang>=='!','',<count>)
-    command! -bang -count=3 GitDiff :call <SID>GitDiff('HEAD','HEAD',<q-bang>=='!',expand('%:p'),<q-count>)
-    command! GitStash :call <SID>GitStashView()
-    command! GitStashSave :call <SID>GitStashSave(input('Stash message: '))
+    command! -nargs=* -complete=custom,<SID>GitBranchCompleter GitGraph call <SID>GitGraphView(<f-args>)
+    command! GitStatus call <SID>GitStatusView()
+    command! -bang -count -nargs=? GitCommit call <SID>GitCommitView(<q-args>,<q-bang>=='!','',<count>)
+    command! -bang -count=3 GitDiff call <SID>GitDiff('HEAD','HEAD',<q-bang>=='!',expand('%:p'),<q-count>)
+    command! GitStash call <SID>GitStashView()
+    command! GitStashSave call <SID>GitStashSave(input('Stash message: '))
 
-    command! GitLayout :call <SID>GitLayout()
+    command! GitLayout call <SID>GitLayout()
 
     map ,gg :GitGraph "--all"<cr>
     map ,gs :GitStatus<cr>
@@ -574,7 +571,6 @@ endfunction
 function! s:GitBranch(commit, branch)
     if !empty(a:branch)
         call s:GitRun('branch', shellescape(a:branch, 1), a:commit)
-        call s:GitGraphView()
     endif
 endfunction
 
@@ -590,7 +586,6 @@ function! s:GitTag(commit, tag, ...)
             endif
         endif
         call s:GitRun('tag', mode, shellescape(a:tag, 1), a:commit)
-        call s:GitGraphView()
     endif
 endfunction
 
@@ -602,7 +597,6 @@ function! s:GitMerge(tobranch, frombranch, ...)
         let squash = exists('a:3') && a:3 '--squash' : '--no-squash'
         call s:GitRun('checkout', shellescape(a:tobranch, 1))
         call s:GitRun('merge', nocommit, nofastfwd, squash, shellescape(a:frombranch, 1))
-        call s:GitGraphView()
     endif
 endfunction
 
@@ -612,7 +606,6 @@ function! s:GitRebase(branch, upstream, onto, ...)
         let onto = empty(a:onto) ? a:upstream : a:onto
         let iact = exists('a:1') && a:1 ? '--interactive' : ''
         call s:GitRun('rebase', iact, '--onto', onto, a:upstream, a:branch)
-        call s:GitGraphView()
     endif
 endfunction
 
@@ -695,7 +688,6 @@ function! s:GitPush(word, syng, ...)
         let parts = split(a:word[7:], '/')
         let force = exists('a:1') && a:1 ? '-f' : ''
         call s:GitRun('push', force, parts[0], join(parts[1:], '/'))
-        call s:GitGraphView()
     endif
 endfunction
 
@@ -710,7 +702,6 @@ function! s:GitPull(word, syng)
     if a:syng == 'gitgraphRemoteItem'
         let parts = split(a:word[7:], '/')
         call s:GitRun('pull', parts[0], join(parts[1:], '/'))
-        call s:GitGraphView()
     endif
 endfunction
 
@@ -730,26 +721,22 @@ function! s:GitDelete(word, syng, ...)
         return
     endif
     call s:GitRun(cmd)
-    call s:GitGraphView()
 endfunction
 
 function! s:GitSVNRebase(word, syng)
     call s:GitCheckout(a:word, a:syng)
     call s:GitRun('svn rebase')
-    call s:GitGraphView()
 endfunction
 
 function! s:GitSVNDcommit(word, syng)
     call s:GitCheckout(a:word, a:syng)
     call s:GitRun('svn dcommit')
-    call s:GitGraphView()
 endfunction
 
 " a:1 = parent only
 function! s:GitSVNFetch(...)
     let parent = exists('a:1') && a:1 ? '--parent' : ''
     call s:GitRun('svn fetch', parent)
-    call s:GitGraphView()
 endfunction
 
 " a:1 = force
@@ -807,7 +794,6 @@ function! s:GitRevert(commit, ...)
     let nocommit = exists('a:1') && a:1 ? '--no-commit' : ''
     let signoff = exists('a:2') && a:2 ? '--signoff' : ''
     call s:GitRun('revert', nocommit, signoff, shellescape(commit, 1))
-    call s:GitGraphView()
 endfunction
 
 " a:1 = nocommit, a:2 = signoff, a:3 = attribute
@@ -816,7 +802,6 @@ function! s:GitCherryPick(commit, ...)
     let signoff = exists('a:2') && a:2 ? '--signoff' : ''
     let attrib = exists('a:3') && a:3 ? '-x' : '-r'
     call s:GitRun('cherry-pick', nocommit, signoff, attrib, shellescape(commit, 1))
-    call s:GitGraphView()
 endfunction
 
 " a:1 = amend, a:2 = signoff, a:3 = message source: string/(f)ile/(c)ommit
@@ -825,7 +810,6 @@ function! s:GitCommit(msg, ...)
     let signoff = exists('a:2') && a:2 ? '--signoff' : ''
     let msgparam = exists('a:3') ? (a:3 == 'c' ? '-C' : (a:3 == 'f' ? '-F' : '-m')) : '-m'
     call s:GitRun('commit', amend, signoff, msgparam, shellescape(a:msg, 1))
-    call s:GitGraphView()
 endfunction
 
 " the same as GitCommit
@@ -837,7 +821,6 @@ function! s:GitCommitFiles(fname, msg, include, ...)
     let signoff = exists('a:2') && a:2 ? '--signoff' : ''
     let msgparam = exists('a:3') ? (a:3 == 'c' ? '-C' : (a:3 == 'f' ? '-F' : '-m')) : '-m'
     call s:GitRun('commit', amend, signoff, msgparam, shellescape(a:msg, 1), include, '--', files)
-    call s:GitGraphView()
 endfunction
 
 " a:1 = cached, a:2 = recount
@@ -846,7 +829,6 @@ function! s:GitApply(patch, ...)
     let cached = exists('a:1') && a:1 ? '--cached' : ''
     let recount = exists('a:2') && a:2 ? '--recount' : ''
     call s:GitRun('apply', cached, recount, '--', a:patch)
-    call s:GitStatusView()
 endfunction
 
 " a:1 = remove stash after apply, a:2 = apply index
