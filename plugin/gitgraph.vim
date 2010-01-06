@@ -189,7 +189,7 @@ function! s:GitGraphMappings()
     command! -buffer GitSVNDcommit call <SID>GitSVNDcommit(expand('<cword>'), <SID>GetSynName('.', '.')) | call <SID>GitGraphView()
     command! -buffer -bang GitSVNFetch call <SID>GitSVNFetch(<q-bang>=='!') | call <SID>GitGraphView()
 
-    command! -buffer -bang -count GitCommit call <SID>GitCommitView(<SID>GetLineCommit('.'), <q-bang>=='!', 'c', <count>)
+    command! -buffer -bang -count GitCommit call <SID>GitCommitView(<SID>GetLineCommit('.'), <q-bang>=='!', 'c', <q-count>)
     command! -buffer -bang GitReset call <SID>GitReset(<SID>GetLineCommit('.'), <q-bang>=='!' ? 'h' : '') | call <SID>GitGraphView()
 
     " (y)ank range into buffer and (r)ebase onto another branch
@@ -509,7 +509,7 @@ function! s:GitStashView()
 
     command! -buffer -bang GitStashApply call <SID>GitStashApply(line('.')-1, <q-bang>=='!') | call GitStashView()
     command! -buffer GitStashRemove call <SID>GitStashRemove(line('.')-1) | call GitStashView()
-    command! -buffer -count=3 GitStashDiff call <SID>GitStashDiff(line('.')-1, <count>)
+    command! -buffer -count=3 GitStashDiff call <SID>GitStashDiff(line('.')-1, <q-count>)
 
     map <buffer> dd :GitStashRemove<CR>
     map <buffer> yy :GitStashApply<CR>
@@ -562,7 +562,7 @@ function! s:GitGraphInit()
 
     command! -nargs=* -complete=custom,<SID>GitBranchCompleter GitGraph call <SID>GitGraphView(<f-args>)
     command! GitStatus call <SID>GitStatusView()
-    command! -bang -count -nargs=? GitCommit call <SID>GitCommitView(<q-args>, <q-bang>=='!', '', <count>)
+    command! -bang -count -nargs=? GitCommit call <SID>GitCommitView(<q-args>, <q-bang>=='!', '', <q-count>)
     command! -bang -count=3 GitDiff call <SID>GitDiff('HEAD', 'HEAD', <q-bang>=='!', expand('%:p'), <q-count>)
     command! GitStash call <SID>GitStashView()
     command! GitStashSave call <SID>GitStashSave(input('Stash message: '))
