@@ -39,7 +39,7 @@ endfunction
 " if string its a layout element to use.
 " a:1 = cmd = command to run to fill the new window,
 " a:2 = gravity = one of commands la(leftabove)/rb(rightbelow)/tl(topleft)/br(botright)/t(tab).
-let s:gitgraph_gravities = { 't': 'tab', 'la': 'leftabove', 'rb': 'rightbelow', 'tl': 'topleft', 'br': 'botright' }
+let s:gitgraph_gravities = { 't': 'tab ', 'la': 'leftabove ', 'rb': 'rightbelow ', 'tl': 'topleft ', 'br': 'botright ' }
 function! s:Scratch(bufname, size, ...)
 
     " parse args at first
@@ -51,23 +51,21 @@ function! s:Scratch(bufname, size, ...)
     endif
 
     let gravity = get(s:gitgraph_gravities, gravity, 'rb')
-    let vertical = '_'
 
     " negative size opens vertical window
     if size < 0
-        let vertical = '|'
         let gravity = 'vertical ' . gravity
         let size = -size
     end
 
+    if size > 1 | let gravity = gravity . size | endif
+
     " now we must try to find buffer with the name
-    let bufpat = '^\V'.a:bufname.'\$'
-    let bufno = bufnr(bufpat)
+    let bufno = bufnr('^\V'.a:bufname.'\$')
 
     " no buffer is created yet
     if bufno == -1
-        exec gravity . ' new'
-        if size > 1 | exec size.'wincmd ' . vertical | endif
+        exec gravity . 'new'
         setl noswf nonu nospell bt=nofile bh=hide
         exec 'file ' . escape(a:bufname, ' ')
 
@@ -77,8 +75,7 @@ function! s:Scratch(bufname, size, ...)
 
         " the buffer is not opened in any window, open it up
         if winno == -1
-            exec gravity . ' split +buffer' . bufno
-            if size > 1 | exec size.'wincmd ' . vertical | endif
+            exec gravity . 'split +buffer' . bufno
 
         " the buffer is opened in some window, so switch to it if necessary
         elseif winno != winnr()
