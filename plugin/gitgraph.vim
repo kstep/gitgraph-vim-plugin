@@ -465,13 +465,13 @@ function! s:GitCommitBuffer()
     let bufno = bufnr('%')
     let msgfile = tempname()
     call writefile(s:GetMessageBuffer(bufno), msgfile)
+    setl nomod
     try
         call s:GitCommit(msgfile, b:gitgraph_commit_amend, b:gitgraph_commit_signoff, 'f')
         if bufno >= 0 | exec 'bwipeout! '.bufno | endif
     finally
         call delete(msgfile)
     endtry
-    setl nomod
 endfunction
 
 function! s:GitTagBuffer()
@@ -484,13 +484,13 @@ function! s:GitTagBuffer()
 
     let msgfile = tempname()
     call writefile(message, msgfile)
+    setl nomod
     try
         call s:GitTag(b:gitgraph_commit_hash, tagname, 0, b:gitgraph_commit_signoff ? 's' : 'a', msgfile, 1, b:gitgraph_commit_key)
         if bufno >= 0 | exec 'bwipeout! '.bufno | endif
     finally
         call delete(msgfile)
     endtry
-    setl nomod
 endfunction
 " }}}
 
@@ -673,13 +673,13 @@ endfunction
 function! s:GitDiffApply()
     let hunks = getbufline('%', 1, '$')
     let patchfile = tempname()
+    call writefile(hunks, patchfile)
+    setl nomod
     try
-        call writefile(hunks, patchfile)
         call s:GitApply(patchfile, 1, 0)
     finally
         call delete(patchfile)
     endtry
-    setl nomod
 endfunction
 
 function! s:GitDiffGotoFile()
