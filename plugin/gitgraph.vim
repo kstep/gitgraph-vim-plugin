@@ -380,7 +380,8 @@ endfunction
 
 function! s:GitStatusView()
     let repopath = s:GitGetRepository()
-    let cmd = 'lcd ' . repopath . ' | ' . s:GitRead('status')
+    let cmd = 'lcd ' . repopath . ' | setl enc=latin1 | ' . s:GitRead('status')
+
     call s:Scratch('[Git Status:'.fnamemodify(repopath, ':t').']', 's', cmd)
     setl ma
     silent! 1,/^#\( Changes\| Changed\| Untracked\| Unmerged\)/-1delete
@@ -393,9 +394,17 @@ function! s:GitStatusView()
     silent! %s/^#\tboth modified:      /\t[?] /e
     silent! %s/^#\t/\t[ ] /e
     silent! %s/^#\s*$//e
-    if has('perl') || has('perl/dyn')
-        silent! g/^\t\[.\] \".*\"$/perldo s/\\([0-7]{1,3})|(")/if($2){""}else{$c=oct($1);if(($c&0xc0)==0x80){$a=($a<<6)|($c&63);$i--}else{for($m=0x80,$i=-1;($m&$c)!=0;$m>>=1){$i++};$a=$c&($m-1)};$i>0?"":chr($a)}/ge
-    end
+
+    " I use double conversion latin1->utf-8 in order to unescape
+    " octal-escaped utf-8 file names, which can contain git-status output.
+    " I used to use the following perl snippet to do the same thing w/o
+    " encoding resetting:
+    "if has('perl') || has('perl/dyn')
+    "    silent! g/^\t\[.\] \".*\"$/perldo s/\\([0-7]{1,3})|(")/if($2){""}else{$c=oct($1);if(($c&0xc0)==0x80){$a=($a<<6)|($c&63);$i--}else{for($m=0x80,$i=-1;($m&$c)!=0;$m>>=1){$i++};$a=$c&($m-1)};$i>0?"":chr($a)}/ge
+    "end
+    silent! g/^\t\[.\] \"/s/\\\([0-7]\+\)/\=eval('"\<Char-0'.submatch(1).'>"')/ge
+    setl enc=utf-8
+
     setl ts=4 noma nomod ft=gitstatus fdm=syntax nowrap cul
     goto 1
 
