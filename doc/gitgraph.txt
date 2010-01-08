@@ -289,10 +289,32 @@ View opening commands are the following:
 5. Graph view						*gitgraph-graph-view* {{{1
 
 Here we come to the heart of GitGraph plugin: the Git Graph view, the History
-browser of a git repositary. There're a plenty of features in the view from
+browser of a git repository. There're a plenty of features in the view from
 rebase to reset.
 
-TODO
+Git Graph view features:
+
+	- Graph representation of git's history (ya, really =),
+	- Commits folding (use usual vim |zc| and |zo| mappings to fold/unfold
+	  linear parts of history graph |folding|) |gitgraph-graph-folding|,
+	- Jump between branches and branch checkout
+	  |gitgraph-graph-checkout| |gitgraph-graph-nextref|,
+	- Diff view between any two given revisions using ranges and count
+	  modifies |gitgraph-graph-diff| |gitgraph-graph-diffsplit|,
+	- Merge and rebase branches and simple ranges of revisions with simple
+	  vim-like keybindings like yank and put |gitgraph-graph-rebase|
+	  |gitgraph-graph-merge|,
+	- Create and remove branches, tags (both annotated and lightweight)
+	  and remotes |gitgraph-graph-tag| |gitgraph-graph-anntag|
+	  |gitgraph-graph-signedtag| |gitgraph-graph-branch|
+	  |gitgraph-graph-delete|,
+	- Commit and amend commit picking initial message from selected commit
+	  |gitgraph-graph-commit|,
+	- Push and pull from/to remote branch |gitgraph-graph-push|
+	  |gitgraph-graph-push|,
+	- Working with SVN (yeah, git-svn is supported): svn rebase, dcommit
+	  and fetch are all here |gitgraph-graph-svnrebase|
+	  |gitgraph-graph-svndcommit| |gitgraph-graph-svnfetch|.
 
 5.1. Graph view mappings				*gitgraph-graph-mappings* {{{2
 
