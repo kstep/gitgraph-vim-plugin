@@ -595,7 +595,7 @@ function! s:GitGraphInit()
     map ,gs :GitStatus<cr>
     map ,gc :GitCommit<cr>
     map ,gC :GitCommit!<cr>
-    map ,gd :GitDiff<cr>
+    map ,gd :<C-U>exec (v:count == 0 ? 3 : v:count)."GitDiff"<cr>
     map ,gt :GitStash<cr>
     map ,ga :GitAddFile<cr>
     map ,gA :GitStashSave<cr>

@@ -180,6 +180,8 @@ layout rules |gitgraph-layouts| will be opened with view buffer.
 			and stage resulting diff by writing it |:write|.
 			You can also use “gf” mapping from any place in diff
 			to go to original file's place |gitgraph-diff-gf|.
+			This command also accepts count prefix to define
+			number of context lines in diff, defaults to 3.
 	*<gitgraph-gt>* *,gt*
 			opens Git Stash view |gitgraph-stash-view| with a list
 			of stashes. You can drop stashes with “dd”
