@@ -137,6 +137,8 @@ function! s:GitDiffBuffer(bufname, cmd)
     setl ft=diff inex=GitGraphGotoFile(v:fname) bt=acwrite bh=wipe
     map <buffer> <C-f> /^diff --git<CR>
     map <buffer> <C-b> ?^diff --git<CR>
+    map <buffer> <Tab> /^@@ <CR>
+    map <buffer> <S-Tab> ?^@@ <CR>
     map <buffer> dd :call <SID>GitDiffDelete()<CR>
     map <buffer> gf :call <SID>GitDiffGotoFile()<CR>
     augroup GitDiffView
