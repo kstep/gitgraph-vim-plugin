@@ -39,7 +39,10 @@ endfunction
 " if string its a layout element to use.
 " a:1 = cmd = command to run to fill the new window,
 " a:2 = gravity = one of commands la(leftabove)/rb(rightbelow)/tl(topleft)/br(botright)/t(tab).
-let s:gitgraph_gravities = { 't': 'tab ', 'la': 'leftabove ', 'rb': 'rightbelow ', 'tl': 'topleft ', 'br': 'botright ' }
+let s:gitgraph_gravities = {
+    \ 't': 'tab ', 'la': 'leftabove ',
+    \ 'rb': 'rightbelow ', 'tl': 'topleft ',
+    \ 'br': 'botright ' }
 function! s:Scratch(bufname, size, ...)
 
     " parse args at first
@@ -576,7 +579,8 @@ function! s:GitGraphInit()
     " format: [gstdcf]:<size>:<gravity>,...,l:[gstdcf]+
     " for size & gravity discription see s:Scratch().
     if !exists('g:gitgraph_layout') || empty(g:gitgraph_layout)
-        let g:gitgraph_layout = { 'g':[20,'la'], 's':[-30,'tl'], 't':[5,'rb'], 'd':[0,'br'], 'c':[10,'br'], 'f':[0,'rb'], 'l':['g','s','t'] }
+        let g:gitgraph_layout = { 'g':[20,'la'], 's':[-30,'tl'], 't':[5,'rb'], 'd':[0,'br'],
+                    \ 'c':[10,'br'], 'f':[0,'rb'], 'l':['g','s','t'] }
     endif
 
     let s:gitgraph_git_path = g:gitgraph_git_path
