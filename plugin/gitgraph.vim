@@ -749,9 +749,9 @@ function! s:GitDiffDelete()
     endif
 endfunction
 
-function! s:GitShow(commit, ...)
+function! s:GitShow(commit)
     if !empty(a:commit)
-        let cmd = s:GitRead('show', join(a:000, ' '), a:commit)
+        let cmd = s:GitRead('show', a:commit)
         call s:Scratch('[Git Show]', 'f', cmd)
         setl ft=diff.gitlog inex=GitGraphGotoFile(v:fname)
         map <buffer> <C-f> /^diff --git<CR>
