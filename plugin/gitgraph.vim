@@ -119,6 +119,17 @@ function! s:GitGetRepository()
     return reponame
 endfunction
 
+function! s:GitGetRepoFilename(filename)
+    let reponame = s:GitGetRepository()
+    let repolen = strlen(reponame)
+
+    if strpart(a:filename, 0, repolen) !=# reponame
+        return ''
+    endif
+
+    return strpart(a:filename, repolen+1)
+endfunction
+
 function! s:GetLineCommit(line)
     return matchstr(getline(a:line), '\<[a-f0-9]\{7,40}\>')
 endfunction
@@ -173,6 +184,7 @@ function! s:GitGraphMappings()
     command! -buffer -bang GitRebaseOnto :let rng = <SID>GetRegCommit(v:register) | call <SID>GitRebase(rng[0], rng[1], <SID>GetLineCommit('.'), <q-bang>=='!') | call <SID>GitGraphView()
     command! -buffer -bang GitRebaseCurrent call <SID>GitRebase('', <SID>GetLineCommit('.'), '', <q-bang>=='!') | call <SID>GitGraphView()
     command! -buffer -bang -nargs=* -range GitDiff call <SID>GitDiff(<SID>GetLineCommit(<line1>), <SID>GetLineCommit(<line2>), <q-bang>=='!', <f-args>)
+    command! -buffer -range GitDiffSplit call <SID>GitDiffSplit(expand('#:p'), <SID>GetLineCommit(<line1>), <SID>GetLineCommit(<line2>))
     command! -buffer GitShow call <SID>GitShow(<SID>GetLineCommit('.'))
     command! -buffer -bang GitNextRef call <SID>GitGraphNextRef(<q-bang>=='!')
 
@@ -228,6 +240,7 @@ function! s:GitGraphMappings()
     vmap <buffer> gr :GitRebase<space>
     vmap <buffer> gR :GitRebase!<cr>
     map <buffer> gd :GitDiff<cr>
+    map <buffer> gD :GitDiffSplit<cr>
     map <buffer> gf :GitShow<cr>
 
     " like gu/gp, but for git-svn
@@ -582,7 +595,7 @@ function! s:GitGraphInit()
     " for size & gravity discription see s:Scratch().
     if !exists('g:gitgraph_layout') || empty(g:gitgraph_layout)
         let g:gitgraph_layout = { 'g':[20,'la'], 's':[-30,'tl'], 't':[5,'rb'], 'd':[0,'br'],
-                    \ 'c':[10,'br'], 'f':[0,'rb'], 'l':['g','s','t'] }
+                    \ 'c':[10,'br'], 'v':[0,'rb'], 'f':[0,'rb'], 'l':['g','s','t'] }
     endif
 
     let s:gitgraph_git_path = g:gitgraph_git_path
@@ -592,6 +605,7 @@ function! s:GitGraphInit()
     command! GitStatus call <SID>GitStatusView()
     command! -bang -count -nargs=? GitCommit call <SID>GitCommitView(<q-args>, <q-bang>=='!', '', <q-count>)
     command! -bang -count=3 GitDiff call <SID>GitDiff('HEAD', 'HEAD', <q-bang>=='!', expand('%:p'), <q-count>)
+    command! -count GitDiffSplit call <SID>GitDiffSplit(expand('%:p'), 'HEAD~'.<q-count>)
     command! GitStash call <SID>GitStashView()
     command! GitStashSave call <SID>GitStashSave(input('Stash message: '))
     command! GitAddFile call <SID>GitAddFiles(expand('%:p'))
@@ -603,6 +617,7 @@ function! s:GitGraphInit()
     map ,gc :GitCommit<cr>
     map ,gC :GitCommit!<cr>
     map ,gd :<C-U>exec (v:count == 0 ? 3 : v:count)."GitDiff"<cr>
+    map ,gD :<C-U>exec v:count1."GitDiffSplit"<CR>
     map ,gt :GitStash<cr>
     map ,ga :GitAddFile<cr>
     map ,gA :GitStashSave<cr>
@@ -765,6 +780,13 @@ function! s:GitShow(commit)
         map <buffer> <C-b> ?^diff --git<CR>
         map <buffer> gf :call <SID>GitDiffGotoFile()<CR>
     endif
+endfunction
+
+function! s:GitShowFile(commit, filename, size, gravity)
+    let gitfname = a:commit.':'.a:filename
+    let cmd = s:GitRead('show', gitfname)
+    call s:Scratch('git:'.gitfname, a:size, cmd, a:gravity)
+    filetype detect
 endfunction
 
 " a:1 - force
@@ -952,6 +974,40 @@ function! s:GitStashDiff(stashno, ...)
     let ctxl = exists('a:1') ? '-U'.a:1 : ''
     let cmd = s:GitRead('stash show -p', ctxl, shellescape(stashname, 1))
     call s:GitDiffBuffer('[Git Stash Diff]', cmd)
+endfunction
+
+" a:1 = rev1, a:2 = rev2
+" if a:0 == 0, diff current vs. HEAD, a:0 == 1, diff current vs. a:1, a:0 ==
+" 2, diff a:1 vs. a:2
+function! s:GitDiffSplit(filename, ...)
+    if a:0 == 0
+        let rev1 = ''
+        let rev2 = 'HEAD'
+    elseif a:0 == 1
+        let rev1 = ''
+        let rev2 = a:1
+    elseif a:0 == 2
+        let rev1 = a:1
+        let rev2 = a:2
+    else
+        return
+    endif
+
+    let repofname = s:GitGetRepoFilename(a:filename)
+    if empty(repofname)
+        echoerr 'File "'.a:filename.'" not in current repository!'
+        return
+    endif
+
+    call s:GitShowFile(rev2, repofname, 'v', '')
+    diffthis
+
+    if empty(rev1)
+        exec 'vertical leftabove new '.a:filename
+    else
+        call s:GitShowFile(rev1, repofname, -1, 'la')
+    endif
+    diffthis
 endfunction
 " }}}
 
