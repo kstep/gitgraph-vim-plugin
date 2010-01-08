@@ -88,6 +88,7 @@ function! s:Scratch(bufname, size, ...)
         setl ma
         1,$delete
         exec a:1
+        $delete " :0read hack: last line must be removed
     endif
 
     " the buffer is not modifiable
