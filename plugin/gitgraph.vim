@@ -299,13 +299,13 @@ endfunction
 
 " GitStatus view implementation {{{
 function! s:GitStatusNextFile(back)
-    call s:SynSearch('\[[ =+*-]\]', ['gitModFile', 'gitNewFile', 'gitDelFile', 'gitUnFile'], a:back)
+    call s:SynSearch('[\[{][ =+*-][\]}]', ['gitModFile', 'gitNewFile', 'gitDelFile', 'gitUntFile'], a:back)
 endfunction
 
 function! s:GitStatusGetFile(lineno)
     let synname = s:GetSynName(a:lineno, 5)
     if synname ==# 'gitModFile' || synname ==# 'gitNewFile'
-        \ || synname ==# 'gitDelFile' || synname ==# 'gitUnFile'
+        \ || synname ==# 'gitDelFile' || synname ==# 'gitUntFile'
         \ || synname ==# 'gitRenFile'
         return getline(a:lineno)[5:]
     endif
@@ -313,7 +313,7 @@ function! s:GitStatusGetFile(lineno)
 endfunction
 
 function! s:GitStatusGetFilesDict(l1, l2)
-    let filelist = { 'gitModFile': [], 'gitNewFile': [], 'gitDelFile': [], 'gitUnFile': [], 'gitRenFile': [] }
+    let filelist = { 'gitModFile': [], 'gitNewFile': [], 'gitDelFile': [], 'gitUntFile': [], 'gitRenFile': [] }
     for lineno in range(a:l1, a:l2)
         let fname = s:GitStatusGetFile(lineno)
         let synname = s:GetSynName(lineno, 5)
@@ -352,7 +352,7 @@ function! s:GitStatusAddFile(fname, region)
     if empty(a:fname) | return | endif
     if a:region ==# 'gitUnstaged' || a:region ==# 'gitUntracked'
         if type(a:fname) == type({})
-            call s:GitAddFiles(a:fname['gitUnFile'])
+            call s:GitAddFiles(a:fname['gitUntFile'])
             call s:GitAddFiles(a:fname['gitModFile'])
             call s:GitAddFiles(a:fname['gitRenFile'])
             call s:GitPurgeFiles(a:fname['gitDelFile'])
@@ -384,14 +384,29 @@ function! s:GitStatusView()
 
     call s:Scratch('[Git Status:'.fnamemodify(repopath, ':t').']', 's', cmd)
     setl ma
+
     silent! 1,/^#\( Changes\| Changed\| Untracked\| Unmerged\)/-1delete
     silent! g!/^#\( Changes\| Changed\| Untracked\| Unmerged\|\t\|\s*$\)/delete
     silent! g/^#\( Changes\| Changed\| Untracked\| Unmerged\)/.+1delete
-    silent! %s/^#\tmodified:   /\t[*] /e
-    silent! %s/^#\tnew file:   /\t[+] /e
-    silent! %s/^#\tdeleted:    /\t[-] /e
-    silent! %s/^#\trenamed:    /\t[=] /e
-    silent! %s/^#\tboth modified:      /\t[?] /e
+
+    silent! %s/^#\tnew file:\s\+/\t[+] /e
+    silent! %s/^#\tmodified:\s\+/\t[*] /e
+    silent! %s/^#\tdeleted:\s\+/\t[-] /e
+    silent! %s/^#\trenamed:\s\+/\t[=] /e
+    silent! %s/^#\tcopied:\s\+/\t[>] /e
+    silent! %s/^#\tunknown:\s\+/\t[?] /e
+    silent! %s/^#\tunmerged:\s\+/\t[%] /e
+    silent! %s/^#\ttypechange:\s\+/\t[@] /e
+
+    silent! %s/^#\tboth modified:\s\+/\t{*} /e
+    silent! %s/^#\tboth added:\s\+/\t{+} /e
+    silent! %s/^#\tboth deleted:\s\+/\t{-} /e
+
+    silent! %s/^#\tadded by us:\s\+/\t[+} /e
+    silent! %s/^#\tdeleted by us:\s\+/\t[-} /e
+    silent! %s/^#\tadded by them:\s\+/\t{+] /e
+    silent! %s/^#\tdeleted by them:\s\+/\t{-] /e
+
     silent! %s/^#\t/\t[ ] /e
     silent! %s/^#\s*$//e
 
@@ -402,7 +417,7 @@ function! s:GitStatusView()
     "if has('perl') || has('perl/dyn')
     "    silent! g/^\t\[.\] \".*\"$/perldo s/\\([0-7]{1,3})|(")/if($2){""}else{$c=oct($1);if(($c&0xc0)==0x80){$a=($a<<6)|($c&63);$i--}else{for($m=0x80,$i=-1;($m&$c)!=0;$m>>=1){$i++};$a=$c&($m-1)};$i>0?"":chr($a)}/ge
     "end
-    silent! g/^\t\[.\] \"/s/\\\([0-7]\+\)/\=eval('"\<Char-0'.submatch(1).'>"')/ge
+    silent! g/^\t[\[{].[\]}] \"/s/\\\([0-7]\+\)/\=eval('"\<Char-0'.submatch(1).'>"')/ge
     setl enc=utf-8
 
     setl ts=4 noma nomod ft=gitstatus fdm=syntax nowrap cul
