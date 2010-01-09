@@ -22,9 +22,14 @@ function! s:GetSynRegionName(l, c, ...)
 endfunction
 
 function! s:SynSearch(pattern, synnames, back)
+    let oldpos = getpos('.')
     while 1
         let found = searchpos(a:pattern, a:back ? 'bW' : 'W')
-        if found == [0,0] | break | endif
+        if found == [0,0]
+            call setpos('.', oldpos)
+            echomsg 'No more matches found!'
+            break
+        endif
         let synname = synIDattr(synID(found[0], found[1], 1), 'name')
         if index(a:synnames, synname) > -1 | break | endif
     endwhile
