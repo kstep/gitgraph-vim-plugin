@@ -261,7 +261,7 @@ endfunction
 function! s:GitGraphNew(branch, afile)
     let repopath = s:GitGetRepository()
     let reponame = fnamemodify(repopath, ':t')
-    call s:Scratch('[Git Graph:'.reponame.']', 'g')
+    call s:Scratch('git-graph:'.reponame, 'g')
     let b:gitgraph_file = a:afile
     let b:gitgraph_branch = a:branch
     let b:gitgraph_repopath = repopath
@@ -405,7 +405,7 @@ function! s:GitStatusView()
     let repopath = s:GitGetRepository()
     let cmd = 'lcd ' . repopath . ' | setl enc=latin1 | ' . s:GitRead('status')
 
-    call s:Scratch('[Git Status:'.fnamemodify(repopath, ':t').']', 's', cmd)
+    call s:Scratch('git-status:'.fnamemodify(repopath, ':t'), 's', cmd)
     setl ma
 
     silent! 1,/^#\( Changes\| Changed\| Untracked\| Unmerged\)/-1delete
@@ -453,7 +453,7 @@ endfunction
 " GitCommit view implementation {{{
 " a:1 = tag mode, a:2 = tagname, a:3 = key id
 function! s:GitCommitView(msg, amend, src, signoff, ...)
-    call s:Scratch('[Git Commit]', 'c', '1') | setl ma
+    call s:Scratch('git-commit', 'c', '1') | setl ma
 
     let tagmode = 0
     let submessage = []
@@ -544,7 +544,7 @@ endfunction
 " GitStash view implementation {{{
 function! s:GitStashView()
     let cmd = s:GitRead('stash list')
-    call s:Scratch('[Git Stash:'.fnamemodify(s:GitGetRepository(), ':t').']', 't', cmd)
+    call s:Scratch('git-stash:'.fnamemodify(s:GitGetRepository(), ':t'), 't', cmd)
     setl ma
     silent! %s/^stash@{[0-9]\+}: //e
     silent! g/^\s*$/d
@@ -565,7 +565,7 @@ endfunction
 " GitRemote view implementation {{{
 function! s:GitRemoteView()
     let cmd = s:GitRead('remote', '--verbose')
-    call s:Scratch('[Git Remote:'.fnamemodify(s:GitGetRepository(), ':t').']', 'r', cmd)
+    call s:Scratch('git-remote:'.fnamemodify(s:GitGetRepository(), ':t'), 'r', cmd)
     setl ma
     silent %s/ (\S\+)$//e
     sort u
@@ -742,7 +742,7 @@ function! s:GitDiff(fcomm, tcomm, ...)
     let paths = exists('a:2') && !empty(a:2) ? s:ShellJoin(a:2, ' ') : ''
     let ctxl = exists('a:3') ? '-U'.a:3 : ''
     let cmd = s:GitRead('diff', cached, ctxl, a:tcomm, a:fcomm != a:tcomm ? a:fcomm : '', '--', paths)
-    call s:GitDiffBuffer('[Git Diff]', cmd)
+    call s:GitDiffBuffer('git-diff', cmd)
 endfunction
 
 function! s:GitDiffApply()
@@ -803,7 +803,7 @@ endfunction
 function! s:GitShow(commit)
     if !empty(a:commit)
         let cmd = s:GitRead('show', a:commit)
-        call s:Scratch('[Git Show]', 'f', cmd)
+        call s:Scratch('git-show', 'f', cmd)
         setl ft=diff.gitlog inex=GitGraphGotoFile(v:fname)
         map <buffer> <C-f> /^diff --git<CR>
         map <buffer> <C-b> ?^diff --git<CR>
@@ -1002,7 +1002,7 @@ function! s:GitStashDiff(stashno, ...)
     let stashname = 'stash@{'.a:stashno.'}'
     let ctxl = exists('a:1') ? '-U'.a:1 : ''
     let cmd = s:GitRead('stash show -p', ctxl, shellescape(stashname, 1))
-    call s:GitDiffBuffer('[Git Stash Diff]', cmd)
+    call s:GitDiffBuffer('git-stash-diff', cmd)
 endfunction
 
 " a:1 = rev1, a:2 = rev2
