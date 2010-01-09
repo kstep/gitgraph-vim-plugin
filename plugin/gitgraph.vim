@@ -558,6 +558,23 @@ function! s:GitStashView()
 endfunction
 " }}}
 
+" GitRemote view implementation {{{
+function! s:GitRemoteView()
+    let cmd = s:GitRead('remote', '--verbose')
+    call s:Scratch('[Git Remote:'.fnamemodify(s:GitGetRepository(), ':t').']', 'r', cmd)
+    setl ma
+    silent %s/ (\S\+)$//e
+    sort u
+    setl noma nomod cul nowrap
+
+    command! -buffer GitRemoteAdd call <SID>GitRemoteAdd(input('Enter remote name: '), input('Enter remote URL: '))
+    command! -buffer GitRemoteRemove call <SID>GitRemoteRemove(matchstr(getline('.'), '^.*\t\@='))
+
+    map <buffer> o :GitRemoteAdd<CR>
+    map <buffer> dd :GitRemoteRemove<CR>
+endfunction
+" }}}
+
 " Initializator {{{
 function! s:GitGraphInit()
 
@@ -586,16 +603,18 @@ function! s:GitGraphInit()
     " gitgraph layout configuration, defines how to place different views namely:
     " g = (g)raph view,
     " s = (s)tatus view,
-    " t = s(t)ash view (todo),
+    " t = s(t)ash view,
     " d = (d)iff view,
-    " c = (c)ommit view (todo),
+    " c = (c)ommit view,
+    " v = (v)imdiff view,
+    " r = (r)emotes view,
     " f = new (f)ile opened from any view (currently diff or status),
     " l = (l)ayout: open these objects in order when activating plugin.
     " format: [gstdcf]:<size>:<gravity>,...,l:[gstdcf]+
     " for size & gravity discription see s:Scratch().
     if !exists('g:gitgraph_layout') || empty(g:gitgraph_layout)
         let g:gitgraph_layout = { 'g':[20,'la'], 's':[-30,'tl'], 't':[5,'rb'], 'd':[0,'br'],
-                    \ 'c':[10,'br'], 'v':[0,'rb'], 'f':[0,'rb'], 'l':['g','s','t'] }
+                    \ 'c':[10,'br'], 'v':[0,'rb'], 'f':[0,'rb'], 'r':[5,'rb'], 'l':['g','s','t','r'] }
     endif
 
     let s:gitgraph_git_path = g:gitgraph_git_path
@@ -606,7 +625,9 @@ function! s:GitGraphInit()
     command! -bang -count -nargs=? GitCommit call <SID>GitCommitView(<q-args>, <q-bang>=='!', '', <q-count>)
     command! -bang -count=3 GitDiff call <SID>GitDiff('HEAD', 'HEAD', <q-bang>=='!', expand('%:p'), <q-count>)
     command! -count GitDiffSplit call <SID>GitDiffSplit(expand('%:p'), 'HEAD~'.<q-count>)
+    command! GitRemote call <SID>GitRemoteView()
     command! GitStash call <SID>GitStashView()
+
     command! GitStashSave call <SID>GitStashSave(input('Stash message: '))
     command! GitAddFile call <SID>GitAddFiles(expand('%:p'))
 
@@ -619,6 +640,8 @@ function! s:GitGraphInit()
     map ,gd :<C-U>exec (v:count == 0 ? 3 : v:count)."GitDiff"<cr>
     map ,gD :<C-U>exec v:count1."GitDiffSplit"<CR>
     map ,gt :GitStash<cr>
+    map ,gr :GitRemote<cr>
+
     map ,ga :GitAddFile<cr>
     map ,gA :GitStashSave<cr>
     map ,gf :exec 'GitGraph "--all" 0 '.expand('%:p')<cr>
@@ -637,6 +660,8 @@ function! s:GitLayout()
             call s:GitStatusView()
         elseif obj == 't'
             call s:GitStashView()
+        elseif obj == 'r'
+            call s:GitRemoteView()
         endif
     endfor
 endfunction
@@ -1008,6 +1033,14 @@ function! s:GitDiffSplit(filename, ...)
         call s:GitShowFile(rev1, repofname, -1, 'la')
     endif
     diffthis
+endfunction
+
+function! s:GitRemoteAdd(name, url)
+    call s:GitRun('remote', 'add', a:name, a:url)
+endfunction
+
+function! s:GitRemoteRemove(name)
+    call s:GitRun('remote', 'rm', a:name)
 endfunction
 " }}}
 
