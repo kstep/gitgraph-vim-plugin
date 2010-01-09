@@ -140,7 +140,7 @@ function! s:GetLineCommit(line)
 endfunction
 
 function! s:GetRegCommit(regn)
-    return split(getreg(regn), "\n")
+    return split(getreg(a:regn), "\n")
 endfunction
 
 function! s:GitBranchCompleter(arg, cline, cpos)
