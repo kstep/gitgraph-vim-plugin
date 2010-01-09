@@ -7,23 +7,11 @@
 2.  About GitGraph plugin...........................|gitgraph-about|
 3.  Views overview..................................|gitgraph-views|
 4.  Global bindings.................................|gitgraph-bindings|
-4.1.  Mappings......................................|gitgraph-mappings|
-4.2.  Commands......................................|gitgraph-commands|
 5.  Graph view......................................|gitgraph-graph-view|
-5.1.  Mappings......................................|gitgraph-graph-mappings|
-5.2.  Commands......................................|gitgraph-graph-commands|
 6.  Status view.....................................|gitgraph-status-view|
-6.1.  Mappings......................................|gitgraph-status-mappings|
-6.2.  Commands......................................|gitgraph-status-commands|
 7.  Commit view.....................................|gitgraph-commit-view|
-7.1.  Mappings......................................|gitgraph-commit-mappings|
-7.2.  Commands......................................|gitgraph-commit-commands|
 8.  Diff view.......................................|gitgraph-diff-view|
-8.1.  Mappings......................................|gitgraph-diff-mappings|
-8.2.  Commands......................................|gitgraph-diff-commands|
 9.  Stash view......................................|gitgraph-stash-view|
-9.1.  Mappings......................................|gitgraph-stash-mappings|
-9.2.  Commands......................................|gitgraph-stash-commands|
 10. Views layouts...................................|gitgraph-layouts|
 11. Available options...............................|gitgraph-options|
 12. Todo list.......................................|gitgraph-todo|
@@ -44,7 +32,7 @@ don't know about, consult git man pages and other available documentation
 know where to start).
 
 The plugin started as a wrapper around “git log --graph” command to display
-git graph in vim, and thus it was given its name. But during my work I found a
+git graph in Vim, and thus it was given its name. But during my work I found a
 lot of things lacking, which might prove useful and time-saving for developer
 (and I'm one, so this plugin is written by developer and for developers).
 For example I missed ability to commit changes in separate hunks, so I
@@ -67,25 +55,42 @@ The plugin provides a number of different views to communicate with git, each
 full with its own context commands and mappings for different actions specific
 (and possible) in it.
 
-There're a total of five views. Here they are in order of appearance:
+Every operation, plugin provides, is implemented in both vim |:command| and
+|:map|, so I describe each feature in both contexts at the same time (as
+command and mapping). Although commands are often give you more options than
+mapping, mappings have quite reasonable defaults and sometimes utilize count
+prefixes, so I think you rarely will need to run commands directly.
+
+Besides that, many commands act differently in different views. When that is
+the case, I'll point it out explicitly.
+
+And the last thing to finish with mappings. There're so called “global”
+mappings, usually used to invoke some view, and “view specific” mappings
+defined in concrete view only and don't have any meaning in global context.
+As a rule of thumb global mappings begin with “,g” sequence meaning something
+like “Hey, git!”, while view local mappings usually don't need this prefix and
+often remap normal vim editing bindings, like “dd”, which doesn't mean much in
+read-only buffers anyway and allow you to operate on views in intuitive way.
+
+There're a total of five main views. Here they are in order of appearance:
 
 	- Graph view |gitgraph-graph-view|, the main one. Displays git
 	  repository's history as a graph using “git log --graph” command
-	  internally. Use |:GitGraph| command or “,gg” mapping <gitgraph-gg>
+	  internally. Use |:GitGraph| command or “,gg” mapping |gitgraph-gg|
 	  to invoke it. Provides a lot of commands to work with git's history.
 
 	- Status view |gitgraph-status-view|. Displays current git repository
 	  status: staged, unstaged and untracked files. You can stage/unstage
 	  files from it, view diffs and remove untracked files. Use
-	  |:GitStatus| command or “,gs” mapping <gitgraph-gs> to invoke it.
+	  |:GitStatus| command or “,gs” mapping |gitgraph-gs| to invoke it.
 	  Use “yy” mapping |gitgraph-status-mappings-yy| to stage file, “dd”
 	  mapping |gitgraph-status-mappings-dd| to unstage file (or delete
-	  untracked one) and “gd” mapping <gitgraph-status-gd> to view file's
+	  untracked one) and “gd” mapping |gitgraph-status-gd| to view file's
 	  diff.
 
 	- Commit view |gitgraph-commit-view|. Provides you with a way to enter
 	  message and commit changes, selected in Status view. Use
-	  |:GitCommit| command or “,gc” mapping <gitgraph-gc> to invoke it.
+	  |:GitCommit| command or “,gc” mapping |gitgraph-gc| to invoke it.
 	  There're other ways to invoke it from Graph view to amend commit or
 	  pick message from other commit to edit, see |gitgraph-graph-view|
 	  for details.
@@ -96,31 +101,41 @@ There're a total of five views. Here they are in order of appearance:
 	- Diff view |gitgraph-diff-view|. This view provides nice diff view
 	  with changes in current file in working copy vs. index, and allows
 	  you to choose concrete hunks and even lines to stage. Use |:GitDiff|
-	  command or “,gd” mapping <gitgraph-gd> to open it.
+	  command or “,gd” mapping |gitgraph-gd| to open it.
 	  There're other ways to invoke it from Status and Graph views to view
 	  commit diffs and staged/unstaged diffs, although not all of them are
 	  fully functional: e.g. you can't easily apply diff from old commit
 	  for obvious reasons.
-	  Use “gf” mapping <gitgraph-diff-gf> in it to go to original file's
-	  position and “dd” mapping <gitgraph-diff-dd> to remove line, hunk or
+	  Use “gf” mapping |gitgraph-diff-gf| in it to go to original file's
+	  position and “dd” mapping |gitgraph-diff-dd| to remove line, hunk or
 	  whole file from diff to prepare it to custom apply operation. If
 	  changed, use |:write| command to apply modified diff as a patch into
 	  index, so it will be available for commit.
 
 	- Stash view |gitgraph-stash-view|. It provides you with a stack-like
 	  stash list. Here you can review your stashes and drop or apply some
-	  of them. Use |:GitStash| command or “,gt” mapping <gitgraph-gt> to
+	  of them. Use |:GitStash| command or “,gt” mapping |gitgraph-gt| to
 	  open it.
 	  To save changes into stash use |:GitStashSave| command or “,gA”
-	  mapping <gitgraph-gA>.
+	  mapping |gitgraph-gA|.
 	  You will be prompted for a message, just hit <Enter> for default.
 
-There's actually one more view: Show view, which is opened from Graph view
-with “gf” mapping <gitgraph-graph-gf> with extended info about concrete commit
-like commit full message, date of commit and committer name, but it neither
-differs from Diff view very much, nor provides any special commands as you
-can't do much with concrete commit, so just take it as a kind of really
-restricted Diff view with extended commit info.
+There's actually two more additional views:
+
+	- Show view, which is opened from Graph view with “gf” mapping
+	  |gitgraph-graph-gf| with extended info about concrete commit like
+	  commit full message, date of commit and committer name, but it neither
+	  differs from Diff view very much, nor provides any special commands as
+	  you can't do much with concrete commit, so just take it as a kind of
+	  really restricted Diff view with extended commit info.
+
+	- DiffSplit view, which is just another normal vimdiff view to compare
+	  two different verions of the same file. Usually invoked with “,gD”
+	  mapping or |:GitDiffSplit| command and works on a single file only.
+	  In this view you can edit only original file, not any of its
+	  revisions. Besides convinient way to view difference and ability to
+	  edit file in working dir, this view doesn't give any special
+	  options.
 
 ==============================================================================
 4. Global bindings					*gitgraph-bindings* {{{1
@@ -133,93 +148,24 @@ files.
 Some of them were mentioned in |gitgraph-views|, but this section describes
 all of them.
 
-4.1. Global mappings					*gitgraph-mappings* {{{2
-
-As a rule of thumb, all global GitGraph mappings begin with “,g” sequence,
-meaning something like “Hey, git!”
-
-There're view opening mappings below. The logic for opening all GitGraph views
+There're view opening bindings below. The logic for opening all GitGraph views
 is exactly the same: if buffer for the view doesn't exist yet, it is created
 and initialized. Afterwards if window with the buffer is already opened in
 current tab, then it will be focused and updated, no resizing will take place.
 And if the view buffer is not opened in any window, a new window according
 layout rules |gitgraph-layouts| will be opened with view buffer.
 
-	*<gitgraph-gg>*	*<gitgraph-gf>* *,gg* *,gf*
-			opens Git Graph view |gitgraph-graph-view| in new window.
-			If there is already buffer with graph opened for
-			current repository, it will be reused, if window is
-			already opened, it will be updated and selected as
-			current.
-			In the form of “,gf” only history of currently opened
-			file will be shown.
-	*<gitgraph-gs>* *,gs*
-			opens Git Status view |gitgraph-status-view| or
-			updates it, if it's already opened.
-			Here you can either stage file with “yy” mapping
-			<gitgraph-status-yy>, or unstage it with “dd”
-			<gitgraph-status-dd>. The latter one used on untracked
-			file will remove it from disk. You can also hit “gd”
-			to open diff view for the file <gitgraph-status-gd> or
-			“gf” to open the file in new window
-			<gitgraph-stash-gf>.
-			You can use counter prefix and visual selection with
-			“yy” and “dd” mappings to affect more than one file at
-			a time.
-	*<gitgraph-gc>* *<gitgraph-gC>* *,gc* *,gC*
-			opens Git Commit view to commit currently staged
-			files. This view will be used to create annotated tags
-			as well, as they are just little more complex commit
-			objects.
-			In the form of “,gC” it will start a commit amend
-			session.
-	*<gitgraph-gd>* *,gd*
-			opens Git Diff view |gitgraph-diff-view| to show diff
-			between current file and HEAD. You can remove lines
-			and hunks from it with “dd” <gitgraph-diff-dd> mapping
-			and stage resulting diff by writing it |:write|.
-			You can also use “gf” mapping from any place in diff
-			to go to original file's place |gitgraph-diff-gf|.
-			This command also accepts count prefix to define
-			number of context lines in diff, defaults to 3.
-	*<gitgraph-gt>* *,gt*
-			opens Git Stash view |gitgraph-stash-view| with a list
-			of stashes. You can drop stashes with “dd”
-			|gitgraph-stash-dd|, apply them with “yy”
-			|gitgraph-stash-yy| and get their diff with “gd”
-			|gitgraph-stash-gd|. You can also “pop” given stash
-			with “xx” |gitgraph-stash-xx| which is essentially the
-			same as git-apply and git-drop done one after another.
-			You can use counter prefix and visual selection to
-			affect a number of stashes at a time.
-
-There're some other actions done via global mappings, which can affect
-git repository's state according current file:
-
-	*<gitgraph-ga>* *,ga*
-			adds current file into index (aka stage it).
-	*<gitgraph-gA>* *,gA*
-			saves current working directory state in a stash (i.e.
-			does git-stash-save). You will be prompted for stash
-			message. You can hit <Enter> in order to accept
-			default autogenerated stash message.
-	*<gitgraph-go>* *,go*
-			opens currenlty setup layout. By default this mapping
-			will open Graph view above current window, then Status
-			view in a narrow full height left-side window, and a
-			small Stash view window immediately under Status view.
-			See |gitgraph-layout| for details.
-
-4.2. Global commands					*gitgraph-commands* {{{2
-
-Every mappings above have correspondent command. Some of these commands
-provide extended options, unavailable via raw mappings described above.
-
-View opening commands are the following:
-
+	*gitgraph-gg* *gitgraph-gf* *,gg* *,gf*
 	*:GitGraph*
-		This command does the same as “,gg” mapping <gitgraph-gg>, but
-		with additional options:
+		opens Git Graph view |gitgraph-graph-view| in new window. If
+		there is already buffer with graph opened for current
+		repository, it will be reused, if window is already opened, it
+		will be updated and selected as current.
+
+		In the form of “,gf” only history of currently opened file
+		will be shown.
+
+		GitGraph command provides you with additional options:
 >
 			:GitGraph [branch] [order] [file]
 <
@@ -228,62 +174,114 @@ View opening commands are the following:
 		history will be shown. Put "--all" in its place to view full
 		history including all branches (note literal quotes, they
 		should be included in ex-command line).
+
 		“order” is a boolean options (i.e. either 1 or 0). If set to
 		1, history will be ordered in date order, otherwise (if
-		omitted or set to 0) commits will be ordered in mor topological
-		order.
+		omitted or set to 0) commits will be ordered in mor
+		topological order.
+
 		“file” option gives a file name in repository, which history
 		will be shown.
+
 		All these settings will be remembered for the Graph view
 		window and if the command is run without parameters it will
 		just update Graph view with last given options.
-	
+			
+	*gitgraph-gs* *,gs*
 	*:GitStatus*
-		This command does exactly the same as “,gs” mapping
-		<gitgraph-gg>. Its synopsis is simple:
->
-			:GitStatus
-<
-		It accepts no options.
+		opens Git Status view |gitgraph-status-view| or updates it, if
+		it's already opened.
 
+		Here you can either stage file with “yy” mapping
+		|gitgraph-status-yy|, or unstage it with “dd”
+		|gitgraph-status-dd|. The latter one used on untracked file
+		will remove it from disk. You can also hit “gd” to open diff
+		view for the file |gitgraph-status-gd| or “gf” to open the
+		file in new window |gitgraph-stash-gf|.
+
+		You can use counter prefix and visual selection with “yy” and
+		“dd” mappings to affect more than one file at a time.
+
+	*gitgraph-gc* *gitgraph-gC* *,gc* *,gC*
 	*:GitCommit* *:GitCommit!*
-		This command is essentially used to implement “,gc” mapping
-		<gitgraph-gc>, but have many options:
+		opens Git Commit view to commit currently staged files. This
+		view will be used to create annotated tags as well, as they
+		are just little more complex commit objects.
+
+		In the form of “,gC” or :GitCommit! it will start a commit
+		amend session.
+
+		GitCommit command, besides bang form run with “,gC” mapping,
+		provides you with more additional options. The synopsis is
+		following:
 >
 			:[signoff]GitCommit[!] [message]
 <
 		“signoff” option in count position is actually a boolean. If
 		present and not zero, the commit will be signed off with your
 		signature when committed.
+
 		“message” is an initial message to be placed into Commit view
 		buffer to edit.
-		If the command is used in its bang form, then commit amend
-		session will be initiated: message will be taken from top
-		comment of current branch (HEAD) and commit will be run with
-		amend option.
 
-	*:GitDiff* *:GitDiff!*
-		This command powers “,gd” mapping <gitgraph-gd>. It accepts
-		following options:
+		The bang form is described above and means just “Amend! Amend
+		this quickly!” =)
+
+	*gitgraph-gd* *,gd*
+	*:GitDiff*
+		opens Git Diff view |gitgraph-diff-view| to show diff between
+		current file and HEAD. You can remove lines and hunks from it
+		with “dd” |gitgraph-diff-dd| mapping and stage resulting diff
+		by writing it |:write|.
+
+		You can also use “gf” mapping from any place in diff to go to
+		original file's place |gitgraph-diff-gf|. This command also
+		accepts count prefix to define number of context lines in
+		diff, defaults to 3.
+
+		The synopsis for the GitDiff command is following:
 >
 			:[count]GitDiff[!]
 <
 		“count” determines number of context lines in the generated
 		diff, defaults to 3.
+
 		If used in bang form, diff against staged version of a file
 		will be generated (normally diff will be taken against
-		committed vertion of the file).
-	
-	*:GitStash*
-		The same as “,gt” mapping <gitgraph-gt>. Nothing to say more.
+		committed version of the file).
 
-	*:GitStashSave*
-		This powers “,gA” mapping <gitgraph-gA>. No more options
-		accepted.
-	
+	*gitgraph-gt* *,gt*
+	*:GitStash*
+		opens Git Stash view |gitgraph-stash-view| with a list of
+		stashes. You can drop stashes with “dd” |gitgraph-stash-dd|,
+		apply them with “yy” |gitgraph-stash-yy| and get their diff
+		with “gd” |gitgraph-stash-gd|. You can also “pop” given stash
+		with “xx” |gitgraph-stash-xx| which is essentially the same as
+		git-apply and git-drop done one after another. You can use
+		counter prefix and visual selection to affect a number of
+		stashes at a time.
+
+There're some other actions done via global mappings, which can affect
+git repository's state according current file:
+
+	*gitgraph-ga* *,ga*
 	*:GitAddFile*
-		Command version if “,ga” mapping <gitgraph-ga>. Still no
-		options.
+		adds current file into index (aka stage it).
+
+	*gitgraph-gA* *,gA*
+	*:GitStashSave*
+		saves current working directory state in a stash (i.e. does
+		git-stash-save). You will be prompted for stash message. You
+		can hit <Enter> in order to accept default autogenerated stash
+		message.
+
+	*gitgraph-go* *,go*
+	*:GitLayout*
+		opens currently setup layout. By default this mapping will
+		open Graph view above current window, then Status view in a
+		narrow full height left-side window, and a small Stash view
+		window immediately under Status view. See |gitgraph-layout|
+		for details.
 
 ==============================================================================
 5. Graph view						*gitgraph-graph-view* {{{1
