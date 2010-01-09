@@ -69,7 +69,7 @@ function! s:Scratch(bufname, size, ...)
     if size > 1 | let gravity = gravity . size | endif
 
     " now we must try to find buffer with the name
-    let bufno = bufnr('\V\^'.a:bufname.'\$')
+    let bufno = bufnr('^'.a:bufname.'$')
 
     " no buffer is created yet
     if bufno == -1
