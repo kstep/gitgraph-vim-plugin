@@ -275,9 +275,9 @@ endfunction
 
 function! s:GitGraphNextRef(back)
     call s:SynSearch('\<\([a-z]\+:\)\?[a-zA-Z0-9./_-]\+\>',
-            \ ["gitgraphRefItem", "gitgraphHeadRefItem",
+            \ ["gitgraphBranchItem", "gitgraphHeadRefItem",
             \ "gitgraphTagItem", "gitgraphRemoteItem",
-            \ "gitgraphStashItem"], a:back)
+            \ "gitgraphStashItem", "gitgraphSvnItem"], a:back)
 endfunction
 
 " a:1 - branch, a:2 - order, a:3 - file
@@ -304,7 +304,7 @@ function! s:GitGraphView(...)
     silent! %s/\[[0-9]*m//ge
 
     silent! g/refs\/tags\//s/\(tag: \)\?refs\/tags\//tag:/ge
-    silent! g/refs\/remotes\//s/refs\/remotes\//remote:/ge
+    silent! g/refs\/remotes\//s/refs\/remotes\/\([^/]\+\/\)\@=/remote:/ge|s/refs\/remotes\//svn:/ge
     silent! g/refs\/heads/s/refs\/heads\///ge
     silent! g/refs\/stash/s/refs\/stash/stash/ge
 
@@ -799,7 +799,7 @@ function! s:GitPush(word, syng, ...)
 endfunction
 
 function! s:GitCheckout(word, syng)
-    if a:syng == 'gitgraphRefItem'
+    if a:syng == 'gitgraphBranchItem' || a:syng == 'gitgraphSvnItem'
         call s:GitRun('checkout', a:word)
         call s:GitGraphMarkHead()
     endif
@@ -815,7 +815,7 @@ endfunction
 " a:1 - force
 function! s:GitDelete(word, syng, ...)
     let force = exists('a:1') && a:1
-    if a:syng == 'gitgraphRefItem'
+    if a:syng == 'gitgraphBranchItem' || a:syng == 'gitgraphSvnItem'
         let par = force ? '-D' : '-d'
         let cmd = 'branch ' . par . ' ' . a:word
     elseif a:syng == 'gitgraphTagItem'
