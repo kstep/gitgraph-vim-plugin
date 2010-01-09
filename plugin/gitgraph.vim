@@ -96,7 +96,6 @@ function! s:Scratch(bufname, size, ...)
         setl ma
         1,$delete
         exec a:1
-        $delete " :0read hack: last line must be removed
     endif
 
     " the buffer is not modifiable
@@ -681,7 +680,7 @@ function! s:GitRun(...)
     exec 'silent !' . s:GitCmd(a:000)
 endfunction
 function! s:GitRead(...)
-    return 'silent 0read !' . s:GitCmd(a:000)
+    return 'silent .!' . s:GitCmd(a:000)
 endfunction
 function! s:GitSys(...)
     return system(s:GitCmd(a:000))
