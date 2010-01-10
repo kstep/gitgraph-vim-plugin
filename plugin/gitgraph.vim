@@ -509,35 +509,23 @@ function! s:GetMessageBuffer(buf)
 endfunction
 
 function! s:GitCommitBuffer()
-    let bufno = bufnr('%')
-    let msgfile = tempname()
-    call writefile(s:GetMessageBuffer(bufno), msgfile)
+    g/^##/delete
+    exec s:GitCommit('-', b:gitgraph_commit_amend, b:gitgraph_commit_signoff, 'f')
     setl nomod
-    try
-        call s:GitCommit(msgfile, b:gitgraph_commit_amend, b:gitgraph_commit_signoff, 'f')
-        if bufno >= 0 | exec 'bwipeout! '.bufno | endif
-    finally
-        call delete(msgfile)
-    endtry
+    bwipeout!
 endfunction
 
 function! s:GitTagBuffer()
-    let bufno = bufnr('%')
-    let message = s:GetMessageBuffer(bufno)
-    let tagline = filter(copy(message), 'v:val =~ "^Tag: "')
-    if empty(tagline) | return | endif
-    let tagname = matchstr(tagline[0], '\h\w*', 5)
+    let tagline = search('^Tag: ', 'nw')
+    if tagline < 1 | return | endif
+    let tagname = matchstr(getline(tagline), '\h\w+', 5)
     if empty(tagname) | return | endif
 
-    let msgfile = tempname()
-    call writefile(message, msgfile)
-    setl nomod
-    try
-        call s:GitTag(b:gitgraph_commit_hash, tagname, 0, b:gitgraph_commit_signoff ? 's' : 'a', msgfile, 1, b:gitgraph_commit_key)
-        if bufno >= 0 | exec 'bwipeout! '.bufno | endif
-    finally
-        call delete(msgfile)
-    endtry
+    exec tagline.'delete'
+    g/^##/delete
+    set nomod
+    call s:GitTag(b:gitgraph_commit_hash, tagname, 0, b:gitgraph_commit_signoff ? 's' : 'a', '-', 1, b:gitgraph_commit_key)
+    bwipeout!
 endfunction
 " }}}
 
@@ -564,8 +552,7 @@ endfunction
 
 " GitRemote view implementation {{{
 function! s:GitRemoteView()
-    let cmd = s:GitRead('remote', '--verbose')
-    call s:Scratch('git-remote:'.fnamemodify(s:GitGetRepository(), ':t'), 'r', cmd)
+    call s:Scratch('git-remote:'.fnamemodify(s:GitGetRepository(), ':t'), 'r', s:GitRead('remote', '--verbose'))
     setl ma
     silent %s/ (\S\+)$//e
     sort u
@@ -681,6 +668,9 @@ function! s:GitRun(...)
 endfunction
 function! s:GitRead(...)
     return 'silent .!' . s:GitCmd(a:000)
+endfunction
+function! s:GitPipe(...)
+    exec '%!' . s:GitCmd(a:000)
 endfunction
 function! s:GitSys(...)
     return system(s:GitCmd(a:000))
@@ -945,7 +935,12 @@ function! s:GitCommit(msg, ...)
     let amend = exists('a:1') && a:1 ? '--amend' : ''
     let signoff = exists('a:2') && a:2 ? '--signoff' : ''
     let msgparam = exists('a:3') ? (a:3 == 'c' ? '-C' : (a:3 == 'f' ? '-F' : '-m')) : '-m'
-    call s:GitRun('commit', amend, signoff, msgparam, shellescape(a:msg, 1))
+
+    if msgparam == '-F' && a:msg == '-'
+        call s:GitPipe('commit', amend, signoff, '-F', '-')
+    else
+        call s:GitRun('commit', amend, signoff, msgparam, shellescape(a:msg, 1))
+    endif
 endfunction
 
 " the same as GitCommit
@@ -956,7 +951,12 @@ function! s:GitCommitFiles(fname, msg, include, ...)
     let amend = exists('a:1') && a:1 ? '--amend' : ''
     let signoff = exists('a:2') && a:2 ? '--signoff' : ''
     let msgparam = exists('a:3') ? (a:3 == 'c' ? '-C' : (a:3 == 'f' ? '-F' : '-m')) : '-m'
-    call s:GitRun('commit', amend, signoff, msgparam, shellescape(a:msg, 1), include, '--', files)
+
+    if msgparam == '-F' && msg == '-'
+        call s:GitPipe('commit', amend, signoff, '-F', '-', include, '--', files)
+    else
+        call s:GitRun('commit', amend, signoff, msgparam, shellescape(a:msg, 1), include, '--', files)
+    endif
 endfunction
 
 " a:1 = cached, a:2 = reverse, a:3 = recount
