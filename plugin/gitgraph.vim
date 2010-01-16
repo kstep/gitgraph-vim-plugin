@@ -123,6 +123,19 @@ function! s:GitGetRepository()
     return reponame
 endfunction
 
+function! s:GitIsSvn()
+    let conf = s:GitSys('config', '--get-regexp', 'svn-remote')
+    return v:shell_error == 0
+endfunction
+
+function! s:GitGetRemoteBranches(svnonly)
+    let branches = split(s:GitSys('branch', '-r'), "\n")
+    if a:svnonly
+        let branches = filter(branches, 'v:val !~ "/"')
+    endif
+    return branches
+endfunction
+
 function! s:GitGetRepoFilename(filename)
     let reponame = s:GitGetRepository()
     let repolen = strlen(reponame)
