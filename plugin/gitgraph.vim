@@ -823,7 +823,6 @@ endfunction
 function! s:GitCheckout(word, syng)
     if a:syng == 'gitgraphBranchItem' || a:syng == 'gitgraphSvnItem'
         call s:GitRun('checkout', a:word)
-        call s:GitGraphMarkHead()
     endif
 endfunction
 
@@ -922,7 +921,7 @@ endfunction
 function! s:GitRevert(commit, ...)
     let nocommit = exists('a:1') && a:1 ? '--no-commit' : ''
     let signoff = exists('a:2') && a:2 ? '--signoff' : ''
-    call s:GitRun('revert', nocommit, signoff, shellescape(commit, 1))
+    call s:GitRun('revert', nocommit, signoff, shellescape(a:commit, 1))
 endfunction
 
 " a:1 = nocommit, a:2 = signoff, a:3 = attribute
