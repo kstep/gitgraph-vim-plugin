@@ -327,20 +327,19 @@ endfunction
 
 function! s:GitStatusGetFile(lineno)
     let synname = s:GetSynName(a:lineno, 5)
-    if synname ==# 'gitModFile' || synname ==# 'gitNewFile'
-        \ || synname ==# 'gitDelFile' || synname ==# 'gitUntFile'
-        \ || synname ==# 'gitRenFile'
+    if synname =~ 'git.*File'
         return getline(a:lineno)[5:]
     endif
     return ''
 endfunction
 
 function! s:GitStatusGetFilesDict(l1, l2)
-    let filelist = { 'gitModFile': [], 'gitNewFile': [], 'gitDelFile': [], 'gitUntFile': [], 'gitRenFile': [] }
+    let filelist = {}
     for lineno in range(a:l1, a:l2)
         let fname = s:GitStatusGetFile(lineno)
         let synname = s:GetSynName(lineno, 5)
         if !empty(fname)
+            if !has_key(filelist, synname) | let filelist[synname] = [] | endif
             call add(filelist[synname], fname)
         endif
     endfor
@@ -373,12 +372,16 @@ endfunction
 
 function! s:GitStatusAddFile(fname, region)
     if empty(a:fname) | return | endif
-    if a:region ==# 'gitUnstaged' || a:region ==# 'gitUntracked'
+    if a:region ==# 'gitUnstaged' || a:region ==# 'gitUntracked' || a:region ==# 'gitUnmerged'
         if type(a:fname) == type({})
-            call s:GitAddFiles(a:fname['gitUntFile'])
-            call s:GitAddFiles(a:fname['gitModFile'])
-            call s:GitAddFiles(a:fname['gitRenFile'])
-            call s:GitPurgeFiles(a:fname['gitDelFile'])
+            call s:GitAddFiles(get(a:fname, 'gitUntFile', []))
+            call s:GitAddFiles(get(a:fname, 'gitModFile', []))
+
+            call s:GitAddFiles(get(a:fname, 'gitMModFile', []))
+            call s:GitAddFiles(get(a:fname, 'gitMNewFile', []))
+
+            call s:GitPurgeFiles(get(a:fname, 'gitDelFile', []))
+            call s:GitPurgeFiles(get(a:fname, 'gitMDelFile', []))
         else
             call s:GitAddFiles(a:fname)
         endif
