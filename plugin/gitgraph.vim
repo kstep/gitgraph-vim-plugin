@@ -1,7 +1,15 @@
 
 " Common utility functions {{{
+function! s:FillList(alist, size, fill)
+    let lst = copy(a:alist)
+    while len(lst) < a:size
+        let lst = add(lst, a:fill)
+    endwhile
+    return lst
+endfunction
+
 function! s:ShellJoin(alist, glue)
-    return type(a:alist) == type([]) ? join(map(a:alist, 'shellescape(v:val, 1)'), a:glue) : shellescape(a:alist, 1)
+    return type(a:alist) == type([]) ? join(map(copy(a:alist), 'shellescape(v:val, 1)'), a:glue) : shellescape(a:alist, 1)
 endfunction
 
 function! s:Line(l)
@@ -163,12 +171,14 @@ endfunction
 function! s:GitDiffBuffer(bufname, cmd)
     call s:Scratch(a:bufname, 'd', a:cmd)
     setl ft=diff inex=GitGraphGotoFile(v:fname) bt=acwrite bh=wipe
+    command! -buffer -count=3 GitDiff let b:gitgraph_diff_args[4]=<q-count>|call call('<SID>GitDiff', b:gitgraph_diff_args)
     map <buffer> <C-f> /^diff --git<CR>
     map <buffer> <C-b> ?^diff --git<CR>
     map <buffer> <Tab> /^@@ <CR>
     map <buffer> <S-Tab> ?^@@ <CR>
     map <buffer> dd :call <SID>GitDiffDelete()<CR>
     map <buffer> gf :call <SID>GitDiffGotoFile()<CR>
+    map <buffer> gd :<C-U>exec v:count1.'GitDiff'<CR>
     augroup GitDiffView
         au!
         au BufWriteCmd <buffer> call s:GitDiffApply()
@@ -749,6 +759,7 @@ function! s:GitDiff(fcomm, tcomm, ...)
     let ctxl = exists('a:3') ? '-U'.a:3 : ''
     let cmd = s:GitRead('diff', cached, ctxl, a:tcomm, a:fcomm != a:tcomm ? a:fcomm : '', '--', paths)
     call s:GitDiffBuffer('git-diff', cmd)
+    let b:gitgraph_diff_args = [ a:fcomm, a:tcomm ] + s:FillList(a:000, 3, 0)
 endfunction
 
 function! s:GitDiffApply()
