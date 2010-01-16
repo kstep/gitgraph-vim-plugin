@@ -308,7 +308,7 @@ function! s:GitGraphView(...)
     silent! %s/\[[0-9]*m//ge
 
     silent! g/refs\/tags\//s/\(tag: \)\?refs\/tags\//tag:/ge
-    silent! g/refs\/remotes\//s/refs\/remotes\/\([^/]\+\/\)\@=/remote:/ge|s/refs\/remotes\//svn:/ge
+    silent! g/refs\/remotes\//s/refs\/remotes\/\([^\/,)]\{-1,}\/\)\@=/remote:/ge|s/refs\/remotes\//svn:/ge
     silent! g/refs\/heads/s/refs\/heads\///ge
     silent! g/refs\/stash/s/refs\/stash/stash/ge
 
