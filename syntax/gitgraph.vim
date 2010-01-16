@@ -35,7 +35,7 @@ syn match gitgraphTree9 "9[*\|/_]" contained contains=gitgraphTreeMarker
 syn match gitgraphTreeC " \*" contained
 syn match gitgraphTreeMarker "[0-9]" contained
 
-syn keyword gitgraphKeywords Merge
+syn match gitgraphKeywords "Merge branch '.\+'"
 
 hi link gitgraphTree Special
 hi link gitgraphCommittish Identifier
