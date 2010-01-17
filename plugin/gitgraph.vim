@@ -168,23 +168,27 @@ function! s:GitBranchCompleter(arg, cline, cpos)
     return lst
 endfunction
 
-function! s:GitDiffBuffer(bufname, cmd)
+function! s:GitDiffBuffer(bufname, cmd, readonly)
     call s:Scratch(a:bufname, 'd', a:cmd)
-    setl ft=diff inex=GitGraphGotoFile(v:fname) bt=acwrite bh=wipe
+    setl ft=diff inex=GitGraphGotoFile(v:fname) bh=wipe
     command! -buffer -count=3 GitDiff let b:gitgraph_diff_args[4]=<q-count>|call call('<SID>GitDiff', b:gitgraph_diff_args)
     map <buffer> <C-f> /^diff --git<CR>
     map <buffer> <C-b> ?^diff --git<CR>
-    map <buffer> dd :call <SID>GitDiffDelete()<CR>
     map <buffer> } /^@@ <CR>
     map <buffer> { ?^@@ <CR>
     map <buffer> ]] /^diff --git<CR>
     map <buffer> [[ ?^diff --git<CR>
     map <buffer> gf :call <SID>GitDiffGotoFile()<CR>
     map <buffer> gd :<C-U>exec v:count1.'GitDiff'<CR>
-    augroup GitDiffView
-        au!
-        au BufWriteCmd <buffer> call s:GitDiffApply()
-    augroup end
+
+    if !a:readonly
+        map <buffer> dd :call <SID>GitDiffDelete()<CR>
+        setl bt=acwrite
+        augroup GitDiffView
+            au!
+            au BufWriteCmd <buffer> call s:GitDiffApply()
+        augroup end
+    endif
 endfunction
 " }}}
 
@@ -760,7 +764,7 @@ function! s:GitDiff(fcomm, tcomm, ...)
     let paths = exists('a:2') && !empty(a:2) ? s:ShellJoin(a:2, ' ') : ''
     let ctxl = exists('a:3') ? '-U'.a:3 : ''
     let cmd = s:GitRead('diff', cached, ctxl, a:tcomm, a:fcomm != a:tcomm ? a:fcomm : '', '--', paths)
-    call s:GitDiffBuffer('git-diff', cmd)
+    call s:GitDiffBuffer('git-diff', cmd, 0)
     let b:gitgraph_diff_args = [ a:fcomm, a:tcomm ] + s:FillList(a:000, 3, 0)
 endfunction
 
@@ -1030,7 +1034,7 @@ function! s:GitStashDiff(stashno, ...)
     let stashname = 'stash@{'.a:stashno.'}'
     let ctxl = exists('a:1') ? '-U'.a:1 : ''
     let cmd = s:GitRead('stash show -p', ctxl, shellescape(stashname, 1))
-    call s:GitDiffBuffer('git-stash-diff', cmd)
+    call s:GitDiffBuffer('git-stash-diff', cmd, 0)
 endfunction
 
 " a:1 = rev1, a:2 = rev2
