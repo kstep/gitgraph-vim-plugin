@@ -1,5 +1,5 @@
 syn match gitgraphTree "^[ 0-9\|/_*]\+\( [0-9a-f]\{7,40}\)\?\( ([:.a-zA-Z0-9_/, -]\+)\)\? " contains=@gitgraphTreeItems
-syn region gitgraphAuthorship start=" \[" end="\]$" matchgroup=Comment contains=@gitgraphAuthorMarks keepend
+syn region gitgraphAuthorship start=" \[[a-zA-Z0-9_]\@=" end="\]$" matchgroup=Comment contains=@gitgraphAuthorMarks keepend
 
 syn match gitgraphCommittish "\<[0-9a-f]\{7,40}\>" nextgroup=gitgraphRefsList contains=gitgraphHeadRefItem contained
 
