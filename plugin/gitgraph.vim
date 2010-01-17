@@ -826,11 +826,8 @@ endfunction
 function! s:GitShow(commit)
     if !empty(a:commit)
         let cmd = s:GitRead('show', a:commit)
-        call s:Scratch('git-show', 'f', cmd)
-        setl ft=diff.gitlog inex=GitGraphGotoFile(v:fname)
-        map <buffer> <C-f> /^diff --git<CR>
-        map <buffer> <C-b> ?^diff --git<CR>
-        map <buffer> gf :call <SID>GitDiffGotoFile()<CR>
+        call s:GitDiffBuffer('git-show', cmd, 1)
+        setl ft=diff.gitlog
     endif
 endfunction
 
