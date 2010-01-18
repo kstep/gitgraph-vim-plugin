@@ -1,7 +1,7 @@
 syn match gitgraphTree "^[ 0-9\|/_*]\+\( [0-9a-f]\{7,40}\)\?\( ([:.a-zA-Z0-9_/, -]\+)\)\? " contains=@gitgraphTreeItems
 syn region gitgraphAuthorship start=" \[[a-zA-Z0-9_]\@=" end="\]$" matchgroup=Comment contains=@gitgraphAuthorMarks keepend
 
-syn match gitgraphCommittish "\<[0-9a-f]\{7,40}\>" nextgroup=gitgraphRefsList contains=gitgraphHeadRefItem contained
+syn match gitgraphCommittish "\<[0-9a-f]\{7,40}\>" nextgroup=gitgraphRefsList contains=gitgraphHeadRefItem,@NoSpell contained
 
 syn region gitgraphRefsList start="(" end=")" contains=@gitgraphRefItems,gitgraphRefSep contained
 syn match gitgraphBranchItem "[.a-zA-Z0-9_/-]\+" nextgroup=gitgraphRefSep contains=gitgraphHeadRefItem contained
@@ -15,13 +15,13 @@ syn cluster gitgraphTreeItems contains=gitgraphTree1,gitgraphTree2,gitgraphTree3
 syn cluster gitgraphRefItems contains=gitgraphBranchItem,gitgraphTagItem,gitgraphStashItem,gitgraphRemoteItem,gitgraphSvnItem
 syn cluster gitgraphAuthorMarks contains=gitgraphAuthor,gitgraphDate
 
-syn match gitgraphAuthor "[^],[]\{-1,}" contained nextgroup=gitgraphDate
-syn match gitgraphDate "[0-9]\{4}\(-[0-9]\{2}\)\{2} [0-9]\{1,2}\(:[0-9]\{2}\)\{2} [+-][0-9]\{4}" contained
-syn match gitgraphDate "\([A-Z][a-z]\{2} \)\{2}[0-9]\{1,2} [0-9]\{1,2}\([0-9]\{2}:\)\{2} [0-9]\{4}" contained
-syn match gitgraphDate "\([0-9]\+ \(second\|minute\|hour\|days\|week\|month\|year\)s\?\(, \)\?\)\+ ago" contained
-syn match gitgraphDate "[A-Z][a-z]\{2}, [0-9]\{1,2} [A-Z][a-z]\{2} [0-9]\{4} [0-9]\{1,2}\(:[0-9]\{2}\)\{2} [+-][0-9]\{4}" contained
-syn match gitgraphDate "[0-9]\{4}\(-[0-9]\{2}\)\{2}" contained
-syn match gitgraphDate "[0-9]\{10,} [+-][0-9]\{4}" contained
+syn match gitgraphAuthor "[^],[]\{-1,}" contained contains=@NoSpell nextgroup=gitgraphDate
+syn match gitgraphDate "[0-9]\{4}\(-[0-9]\{2}\)\{2} [0-9]\{1,2}\(:[0-9]\{2}\)\{2} [+-][0-9]\{4}" contains=@NoSpell contained
+syn match gitgraphDate "\([A-Z][a-z]\{2} \)\{2}[0-9]\{1,2} [0-9]\{1,2}\([0-9]\{2}:\)\{2} [0-9]\{4}" contains=@NoSpell contained
+syn match gitgraphDate "\([0-9]\+ \(second\|minute\|hour\|days\|week\|month\|year\)s\?\(, \)\?\)\+ ago" contains=@NoSpell contained
+syn match gitgraphDate "[A-Z][a-z]\{2}, [0-9]\{1,2} [A-Z][a-z]\{2} [0-9]\{4} [0-9]\{1,2}\(:[0-9]\{2}\)\{2} [+-][0-9]\{4}" contains=@NoSpell contained
+syn match gitgraphDate "[0-9]\{4}\(-[0-9]\{2}\)\{2}" contains=@NoSpell contained
+syn match gitgraphDate "[0-9]\{10,} [+-][0-9]\{4}" contains=@NoSpell contained
 
 syn match gitgraphTree1 "1[*\|/_]" contained contains=gitgraphTreeMarker
 syn match gitgraphTree2 "2[*\|/_]" contained contains=gitgraphTreeMarker
