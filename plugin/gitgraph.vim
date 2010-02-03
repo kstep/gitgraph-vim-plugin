@@ -367,8 +367,8 @@ function! s:GitStatusGetFilesDict(l1, l2)
     let filelist = {}
     for lineno in range(a:l1, a:l2)
         let fname = s:GitStatusGetFile(lineno)
-        let synname = s:GetSynName(lineno, 5)
         if !empty(fname)
+            let synname = s:GetSynName(lineno, 5)
             if !has_key(filelist, synname) | let filelist[synname] = [] | endif
             call add(filelist[synname], fname)
         endif
