@@ -190,6 +190,15 @@ function! s:GitDiffBuffer(bufname, cmd, readonly)
         augroup end
     endif
 endfunction
+
+" returns 1 if workdir is clean, 0 if it has changes.
+" if a:1, then checks index in the same way: 1 => index clean, 0 => index has
+" changes.
+function! s:GitIsClean(...)
+    let cached = a:0 && a:1 ? '--cached' : ''
+    call s:GitSys('diff', cached, '--quiet', '--exit-code')
+    return v:shell_error == 0
+endfunction
 " }}}
 
 " Exported functions {{{
@@ -543,6 +552,14 @@ function! s:GetMessageBuffer(buf)
 endfunction
 
 function! s:GitCommitBuffer()
+    if s:GitIsClean(1)
+        if !s:GitIsClean() && 1 == confirm('No changes were staged. Shall I commit all changes?', "&Yes\n&No")
+            call s:GitSys('add -u')
+        else
+            echomsg "No files to commit!"
+            return
+        endif
+    endif
     g/^##/delete
     exec s:GitCommit('-', b:gitgraph_commit_amend, b:gitgraph_commit_signoff, 'f')
     setl nomod
