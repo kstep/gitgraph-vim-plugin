@@ -174,8 +174,8 @@ function! s:GitDiffBuffer(bufname, cmd, readonly)
     command! -buffer -count=3 GitDiff let b:gitgraph_diff_args[4]=<q-count>|call call('<SID>GitDiff', b:gitgraph_diff_args)
     map <buffer> <C-f> /^diff --git<CR>
     map <buffer> <C-b> ?^diff --git<CR>
-    map <buffer> } /^@@ <CR>
-    map <buffer> { ?^@@ <CR>
+    map <buffer> <Tab> /^@@ <CR>
+    map <buffer> <S-Tab> ?^@@ <CR>
     map <buffer> ]] /^diff --git<CR>
     map <buffer> [[ ?^diff --git<CR>
     map <buffer> gf :call <SID>GitDiffGotoFile()<CR>
@@ -303,8 +303,8 @@ function! s:GitGraphMappings()
     map <buffer> gs :GitSVNFetch<cr>
     map <buffer> gS :GitSVNFetch!<cr>
 
-    map <buffer> } :GitNextRef<cr>
-    map <buffer> { :GitNextRef!<cr>
+    map <buffer> <Tab> :GitNextRef<cr>
+    map <buffer> <S-Tab> :GitNextRef!<cr>
 endfunction
 
 function! s:GitGraphNew(branch, afile)
@@ -446,8 +446,8 @@ function! s:GitStatusMappings()
     command! -buffer -range GitDiff call <SID>GitDiff('', '', <SID>GetSynRegionName('.', '.') ==# 'gitStaged', <SID>GitStatusGetFiles(<line1>, <line2>))
     command! -buffer -range GitStat call <SID>GitStat('', '', <SID>GetSynRegionName('.', '.') ==# 'gitStaged', <SID>GitStatusGetFiles(<line1>, <line2>))
 
-    map <buffer> } :GitNextFile<cr>
-    map <buffer> { :GitNextFile!<cr>
+    map <buffer> <Tab> :GitNextFile<cr>
+    map <buffer> <S-Tab> :GitNextFile!<cr>
     map <buffer> dd :GitRevertFile<cr>
     map <buffer> yy :GitAddFile<cr>
     map <buffer> gd :GitDiff<cr>
