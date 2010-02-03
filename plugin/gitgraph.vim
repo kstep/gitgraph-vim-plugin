@@ -199,6 +199,16 @@ function! s:GitIsClean(...)
     call s:GitSys('diff', cached, '--quiet', '--exit-code')
     return v:shell_error == 0
 endfunction
+
+function! s:GitEnsureClean()
+    if s:GitIsClean() | return 1 | endif
+    let choice = confirm("The command requires the working copy to be clean,\nbut it has changes. "
+                     \ . "I can stash these changes for you.\nShall I proceed?", "&Yes\n&No\nYes, &pop after run")
+    if choice == 2 || choice == 0 | return 0 | endif
+    call s:GitStashSave('')
+    return choice == 1 ? 1 : 2
+endfunction
+
 " }}}
 
 " Exported functions {{{
@@ -909,13 +919,21 @@ function! s:GitDelete(word, syng, ...)
 endfunction
 
 function! s:GitSVNRebase(word, syng)
-    call s:GitCheckout(a:word, a:syng)
-    call s:GitRun('svn rebase')
+    let clean = s:GitEnsureClean()
+    if clean
+        call s:GitCheckout(a:word, a:syng)
+        call s:GitRun('svn rebase')
+        if clean == 2 | call s:GitStashApply(0, 1) | endif
+    endif
 endfunction
 
 function! s:GitSVNDcommit(word, syng)
-    call s:GitCheckout(a:word, a:syng)
-    call s:GitRun('svn dcommit')
+    let clean = s:GitEnsureClean()
+    if clean
+        call s:GitCheckout(a:word, a:syng)
+        call s:GitRun('svn dcommit')
+        if clean == 2 | call s:GitStashApply(0, 1) | endif
+    endif
 endfunction
 
 " a:1 = parent only
