@@ -835,6 +835,13 @@ function! s:GitDiffApply()
 endfunction
 
 function! s:GitDiffGotoFile()
+    " first try to go to file normally
+    let cfile = GitGraphGotoFile(expand('<cfile>'))
+    if filereadable(cfile)
+        exec 'edit! '.cfile
+        return
+    endif
+
     " get header position
     let hdrpos = search('^+++ ', 'nbW')
     if hdrpos < 1 | return | endif
