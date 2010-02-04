@@ -853,7 +853,7 @@ function! s:GitDiffGotoFile()
     let repopath = s:GitGetRepository()
 
     " now we have: original file name, first line of chunk in it and
-    " lines from chunk's start to our destination pos, so junk
+    " lines from chunk's start to our destination pos, so just
     " open the file and goto to position we seek!
     exec 'edit! '. repopath . origfile
     exec len(offlines)+chunkpos
