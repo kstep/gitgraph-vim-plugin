@@ -585,12 +585,14 @@ function! s:GetMessageBuffer(buf)
 endfunction
 
 function! s:GitCommitBuffer()
-    if s:GitIsClean(1)
-        if !s:GitIsClean() && 1 == confirm('No changes were staged. Shall I commit all changes?', "&Yes\n&No")
-            call s:GitSys('add -u')
-        else
-            echomsg "No files to commit!"
-            return
+    if !b:gitgraph_commit_amend
+        if s:GitIsClean(1)
+            if !s:GitIsClean() && 1 == confirm('No changes were staged. Shall I commit all changes?', "&Yes\n&No")
+                call s:GitSys('add -u')
+            else
+                echomsg "No files to commit!"
+                return
+            endif
         endif
     endif
     g/^##/delete
