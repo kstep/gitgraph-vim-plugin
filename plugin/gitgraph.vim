@@ -378,7 +378,7 @@ function! s:GitGraphView(...)
     goto 1
 
     setl bt=nofile bh=delete ft=gitgraph fde=GitGraphFolder(v:lnum) isk=:,a-z,A-Z,48-57,.,_,-,/ fdm=expr nowrap noma nomod noswf cul
-    exec 'setl gp=' . s:gitgraph_git_path . '\ grep\ -n\ $*\ --\ ' . escape(b:gitgraph_repopath, ' ')
+    let &l:grepprg = s:gitgraph_git_path . ' grep -n $* -- ' . escape(b:gitgraph_repopath, ' ')
     call s:GitGraphMarkHead()
 endfunction
 " }}}
@@ -545,7 +545,7 @@ function! s:GitCommitView(msg, amend, src, signoff, ...)
         let editmsg = s:GitGetRepository() . '/.git/COMMIT_EDITMSG'
         if empty(a:msg) && filereadable(editmsg)
             let message = readfile(editmsg)
-            call filter(message, 'v:val !~ "^#"')
+            call filter(message, 'strpart(v:val, 0, 1) != "#"')
         else
             let message = a:msg
         endif
@@ -579,7 +579,8 @@ function! s:GitCommitView(msg, amend, src, signoff, ...)
 endfunction
 
 function! s:GetMessageBuffer(buf)
-    let message = filter(getbufline(a:buf, 1, '$'), 'strpart(v:val, 0, 2) != "##"')
+    let message = getbufline(a:buf, 1, '$')
+    call filter(message, 'strpart(v:val, 0, 2) != "##"')
     return message
 endfunction
 
