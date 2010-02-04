@@ -519,14 +519,23 @@ function! s:GitCommitView(msg, amend, src, signoff, ...)
             let message = message . "\nTag: " . (exists('a:2') && !empty(a:2) ? a:2 : '')
             let b:gitgraph_commit_tag = 1
             let b:gitgraph_commit_key = exists('a:3') ? a:3 : ''
-            call add(submessage, '## ⁰This is a '.(a:signoff ? 'signed ' : '').'tag commit.'.(empty(b:gitgraph_commit_key) ? '' : ' It will be signed with '.b:gitgraph_commit_key.' key.').' Please enter tag name on line with “Tag” above.')
+            call add(submessage, '## ⁰This is a '.(a:signoff ? 'signed ' : '').'tag commit.'
+                        \ .(empty(b:gitgraph_commit_key) ? '' :
+                            \ ' It will be signed with '.b:gitgraph_commit_key.' key.')
+                        \ .' Please enter tag name on line with “Tag” above.')
         endif
     elseif a:src == 'f'
         let message = readfile(a:msg)
     elseif a:amend && empty(a:msg)
         let message = substitute(s:GitSys('cat-file', 'commit', 'HEAD'), '^.\{-}\n\n', '', '')
     else
-        let message = a:msg
+        let editmsg = s:GitGetRepository() . '/.git/COMMIT_EDITMSG'
+        if empty(a:msg) && filereadable(editmsg)
+            let message = readfile(editmsg)
+            call filter(message, 'v:val !~ "^#"')
+        else
+            let message = a:msg
+        endif
     endif
 
     silent 0put =message
