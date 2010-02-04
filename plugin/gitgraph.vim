@@ -186,7 +186,7 @@ function! s:GitDiffBuffer(bufname, cmd, readonly)
         setl bt=acwrite
         augroup GitDiffView
             au!
-            au BufWriteCmd <buffer> setl ma | call s:GitApply('-', 1, 0) | undo | setl nomod noma
+            au BufWriteCmd <buffer> setl ma | call s:GitApply('-', 1, 0) | silent undo | setl nomod noma
         augroup end
     endif
 endfunction
@@ -595,7 +595,7 @@ function! s:GitCommitBuffer()
             endif
         endif
     endif
-    g/^##/delete
+    silent g/^##/delete
     call s:GitCommit('-', b:gitgraph_commit_amend, b:gitgraph_commit_signoff, 'f')
     setl nomod
     bwipeout!
@@ -608,7 +608,7 @@ function! s:GitTagBuffer()
     if empty(tagname) | return | endif
 
     exec tagline.'delete'
-    g/^##/delete
+    silent g/^##/delete
     set nomod
     call s:GitTag(b:gitgraph_commit_hash, tagname, 0, b:gitgraph_commit_signoff ? 's' : 'a', '-', 1, b:gitgraph_commit_key)
     bwipeout!
