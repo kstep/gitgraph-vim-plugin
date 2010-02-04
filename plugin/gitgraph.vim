@@ -361,7 +361,7 @@ function! s:GitGraphView(...)
         call s:GitGraphNew(branch, afile)
     endif
 
-    let cmd = s:GitRead('log', '--graph', '--decorate=full', '--date='.g:gitgraph_date_format, '--format=format:'.s:gitgraph_graph_format, '--abbrev-commit', '--color', '--'.order.'-order', branch, '--', afile)
+    let cmd = s:GitPipe('.', 'log', '--graph', '--decorate=full', '--date='.g:gitgraph_date_format, '--format=format:'.s:gitgraph_graph_format, '--abbrev-commit', '--color', '--'.order.'-order', branch, '--', afile)
     setl ma
     1,$delete
     exec cmd
@@ -469,7 +469,7 @@ endfunction
 
 function! s:GitStatusView()
     let repopath = s:GitGetRepository()
-    let cmd = 'lcd ' . repopath . ' | setl enc=latin1 | ' . s:GitRead('status')
+    let cmd = 'lcd ' . repopath . ' | setl enc=latin1 | ' . s:GitPipe('.', 'status')
 
     call s:Scratch('git-status:'.fnamemodify(repopath, ':t'), 's', cmd)
     setl ma
@@ -593,7 +593,7 @@ function! s:GitCommitBuffer()
         endif
     endif
     g/^##/delete
-    exec s:GitCommit('-', b:gitgraph_commit_amend, b:gitgraph_commit_signoff, 'f')
+    call s:GitCommit('-', b:gitgraph_commit_amend, b:gitgraph_commit_signoff, 'f')
     setl nomod
     bwipeout!
 endfunction
@@ -614,7 +614,7 @@ endfunction
 
 " GitStash view implementation {{{
 function! s:GitStashView()
-    let cmd = s:GitRead('stash list')
+    let cmd = s:GitPipe('.', 'stash list')
     call s:Scratch('git-stash:'.fnamemodify(s:GitGetRepository(), ':t'), 't', cmd)
     setl ma
     silent! %s/^stash@{[0-9]\+}: //e
@@ -635,7 +635,7 @@ endfunction
 
 " GitRemote view implementation {{{
 function! s:GitRemoteView()
-    call s:Scratch('git-remote:'.fnamemodify(s:GitGetRepository(), ':t'), 'r', s:GitRead('remote', '--verbose'))
+    call s:Scratch('git-remote:'.fnamemodify(s:GitGetRepository(), ':t'), 'r', s:GitPipe('.', 'remote', '--verbose'))
     setl ma
     silent %s/ (\S\+)$//e
     sort u
@@ -746,15 +746,15 @@ function! s:GitCmd(args)
     return s:gitgraph_git_path . ' ' . join(a:args, ' ')
 endfunction
 
+" just run simple git command
 function! s:GitRun(...)
     exec 'silent !' . s:GitCmd(a:000)
 endfunction
-function! s:GitRead(...)
-    return 'silent .!' . s:GitCmd(a:000)
+" returns git command setup to pipe current buffer contents through it
+function! s:GitPipe(rng, ...)
+    return 'silent '.a:rng.'!' . s:GitCmd(a:000)
 endfunction
-function! s:GitPipe(...)
-    exec '%!' . s:GitCmd(a:000)
-endfunction
+" runs git command and returns its output
 function! s:GitSys(...)
     return system(s:GitCmd(a:000))
 endfunction
@@ -777,15 +777,19 @@ function! s:GitTag(commit, tag, ...)
             endif
         endif
         if empty(mode)
-            let source = ''
+            let msgparam = ''
             let message = ''
         else
             if !exists('a:3') || empty(a:3) | return | endif
-            let source = exists('a:4') && a:4 ? '-F' : '-m'
+            let msgparam = exists('a:4') && a:4 ? '-F' : '-m'
             let message = shellescape(a:3, 1)
         endif
         let force = exists('a:1') && a:1 ? '--force' : ''
-        call s:GitRun('tag', force, mode, source, message, shellescape(a:tag, 1), a:commit)
+        if msgparam == '-F' && msg == '-'
+            exec s:GitPipe('%', 'tag', force, mode, msgparam, message, shellescape(a:tag, 1), a:commit)
+        else
+            call s:GitRun('tag', force, mode, msgparam, message, shellescape(a:tag, 1), a:commit)
+        endif
     endif
 endfunction
 
@@ -817,7 +821,7 @@ function! s:GitDiff(fcomm, tcomm, ...)
     let paths = exists('a:2') && !empty(a:2) ? s:ShellJoin(a:2, ' ') : ''
     let ctxl = exists('a:3') ? '-U'.a:3 : ''
     let modes = exists('a:4') ? s:GitDiffParseModes(a:4, '-p') : '-p'
-    let cmd = s:GitRead('diff', modes, cached, ctxl, a:tcomm, a:fcomm != a:tcomm ? a:fcomm : '', '--', paths)
+    let cmd = s:GitPipe('.', 'diff', modes, cached, ctxl, a:tcomm, a:fcomm != a:tcomm ? a:fcomm : '', '--', paths)
     call s:GitDiffBuffer('git-diff', cmd, 0)
     let b:gitgraph_diff_args = [ a:fcomm, a:tcomm ] + s:FillList(a:000, 3, 0)
 endfunction
@@ -888,7 +892,7 @@ endfunction
 function! s:GitShow(commit, ...)
     if !empty(a:commit)
         let modes = exists('a:1') ? s:GitDiffParseModes(a:1, '-p --stat') : '-p --stat'
-        let cmd = s:GitRead('show', modes, a:commit)
+        let cmd = s:GitPipe('.', 'show', modes, a:commit)
         call s:GitDiffBuffer('git-show', cmd, 1)
         setl ft=diff.gitlog.gitstat
     endif
@@ -896,7 +900,7 @@ endfunction
 
 function! s:GitShowFile(commit, filename, size, gravity)
     let gitfname = a:commit.':'.a:filename
-    let cmd = s:GitRead('show', gitfname)
+    let cmd = s:GitPipe('.', 'show', gitfname)
     call s:Scratch('git:'.gitfname, a:size, cmd, a:gravity)
     filetype detect
 endfunction
@@ -1037,7 +1041,7 @@ function! s:GitCommit(msg, ...)
     let msgparam = exists('a:3') ? (a:3 == 'c' ? '-C' : (a:3 == 'f' ? '-F' : '-m')) : '-m'
 
     if msgparam == '-F' && a:msg == '-'
-        call s:GitPipe('commit', amend, signoff, '-F', '-')
+        exec s:GitPipe('%', 'commit', amend, signoff, '-F', '-')
     else
         call s:GitRun('commit', amend, signoff, msgparam, shellescape(a:msg, 1))
     endif
@@ -1053,7 +1057,7 @@ function! s:GitCommitFiles(fname, msg, include, ...)
     let msgparam = exists('a:3') ? (a:3 == 'c' ? '-C' : (a:3 == 'f' ? '-F' : '-m')) : '-m'
 
     if msgparam == '-F' && msg == '-'
-        call s:GitPipe('commit', amend, signoff, '-F', '-', include, '--', files)
+        exec s:GitPipe('%', 'commit', amend, signoff, '-F', '-', include, '--', files)
     else
         call s:GitRun('commit', amend, signoff, msgparam, shellescape(a:msg, 1), include, '--', files)
     endif
@@ -1101,7 +1105,7 @@ endfunction
 function! s:GitStashDiff(stashno, ...)
     let stashname = 'stash@{'.a:stashno.'}'
     let ctxl = exists('a:1') ? '-U'.a:1 : ''
-    let cmd = s:GitRead('stash show -p', ctxl, shellescape(stashname, 1))
+    let cmd = s:GitPipe('.', 'stash show -p', ctxl, shellescape(stashname, 1))
     call s:GitDiffBuffer('git-stash-diff', cmd, 0)
 endfunction
 
