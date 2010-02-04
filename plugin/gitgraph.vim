@@ -186,7 +186,7 @@ function! s:GitDiffBuffer(bufname, cmd, readonly)
         setl bt=acwrite
         augroup GitDiffView
             au!
-            au BufWriteCmd <buffer> call s:GitDiffApply()
+            au BufWriteCmd <buffer> setl ma | call s:GitApply('-', 1, 0) | undo | setl nomod noma
         augroup end
     endif
 endfunction
@@ -827,18 +827,6 @@ function! s:GitDiff(fcomm, tcomm, ...)
     let b:gitgraph_diff_args = [ a:fcomm, a:tcomm ] + s:FillList(a:000, 3, 0)
 endfunction
 
-function! s:GitDiffApply()
-    let hunks = getbufline('%', 1, '$')
-    let patchfile = tempname()
-    call writefile(hunks, patchfile)
-    setl nomod
-    try
-        call s:GitApply(patchfile, 1, 0)
-    finally
-        call delete(patchfile)
-    endtry
-endfunction
-
 function! s:GitDiffGotoFile()
     " first try to go to file normally
     let cfile = GitGraphGotoFile(expand('<cfile>'))
@@ -1070,7 +1058,11 @@ function! s:GitApply(patch, ...)
     let cached = exists('a:1') && a:1 ? '--cached' : ''
     let reverse = exists('a:2') && a:2 ? '--reverse' : ''
     let recount = exists('a:3') && a:3 ? '--recount' : ''
-    call s:GitRun('apply', cached, reverse, recount, '--', a:patch)
+    if a:patch == '-'
+        exec s:GitPipe('%', 'apply', cached, reverse, recount, '--', a:patch)
+    else
+        call s:GitRun('apply', cached, reverse, recount, '--', a:patch)
+    endif
 endfunction
 
 " a:1 = remove stash after apply, a:2 = apply index
