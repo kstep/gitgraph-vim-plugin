@@ -191,6 +191,21 @@ function! s:GitDiffBuffer(bufname, cmd, readonly)
     endif
 endfunction
 
+function! s:GitDiffParseModes(modes, default)
+    if empty(a:modes)
+        let modes = default
+    else
+        let modes = ''
+        if stridx(a:modes, 'p') >= 0 | let modes .= '-p ' | endif
+        if stridx(a:modes, 's') >= 0 | let modes .= '--stat=0,1000 ' | endif
+        if stridx(a:modes, 'd') >= 0 | let modes .= '--dirstat ' | endif
+        if stridx(a:modes, 'r') >= 0 | let modes .= '--raw ' | endif
+        if stridx(a:modes, 'n') >= 0 | let modes .= '--numstat ' | endif
+        if stridx(a:modes, 'o') >= 0 | let modes .= '--shortstat ' | endif
+    endif
+    return modes
+endfunction
+
 " returns 1 if workdir is clean, 0 if it has changes.
 " if a:1, then checks index in the same way: 1 => index clean, 0 => index has
 " changes.
@@ -236,7 +251,6 @@ function! s:GitGraphMappings()
     command! -buffer -bang GitRebaseOnto :let rng = <SID>GetRegCommit(v:register) | call <SID>GitRebase(rng[0], rng[1], <SID>GetLineCommit('.'), <q-bang>=='!') | call <SID>GitGraphView()
     command! -buffer -bang GitRebaseCurrent call <SID>GitRebase('', <SID>GetLineCommit('.'), '', <q-bang>=='!') | call <SID>GitGraphView()
     command! -buffer -bang -nargs=* -range GitDiff call <SID>GitDiff(<SID>GetLineCommit(<line1>), <SID>GetLineCommit(<line2>), <q-bang>=='!', <f-args>)
-    command! -buffer -bang -nargs=* -range GitStat call <SID>GitStat(<SID>GetLineCommit(<line1>), <SID>GetLineCommit(<line2>), <q-bang>=='!', <f-args>)
     command! -buffer -range GitDiffSplit call <SID>GitDiffSplit(expand('#:p'), <SID>GetLineCommit(<line1>), <SID>GetLineCommit(<line2>))
     command! -buffer GitShow call <SID>GitShow(<SID>GetLineCommit('.'))
     command! -buffer -bang GitNextRef call <SID>GitGraphNextRef(<q-bang>=='!')
@@ -444,7 +458,6 @@ function! s:GitStatusMappings()
     command! -buffer -range GitRevertFile call <SID>GitStatusRevertFile(<SID>GitStatusGetFiles(<line1>, <line2>), <SID>GetSynRegionName(<line1>, '.')) | call <SID>GitStatusView()
     command! -buffer -range GitAddFile call <SID>GitStatusAddFile(<SID>GitStatusGetFilesDict(<line1>, <line2>), <SID>GetSynRegionName(<line1>, '.')) | call <SID>GitStatusView()
     command! -buffer -range GitDiff call <SID>GitDiff('', '', <SID>GetSynRegionName('.', '.') ==# 'gitStaged', <SID>GitStatusGetFiles(<line1>, <line2>))
-    command! -buffer -range GitStat call <SID>GitStat('', '', <SID>GetSynRegionName('.', '.') ==# 'gitStaged', <SID>GitStatusGetFiles(<line1>, <line2>))
 
     map <buffer> <Tab> :GitNextFile<cr>
     map <buffer> <S-Tab> :GitNextFile!<cr>
@@ -685,7 +698,6 @@ function! s:GitGraphInit()
     command! GitStatus call <SID>GitStatusView()
     command! -bang -count -nargs=? GitCommit call <SID>GitCommitView(<q-args>, <q-bang>=='!', '', <q-count>)
     command! -bang -count=3 GitDiff call <SID>GitDiff('HEAD', 'HEAD', <q-bang>=='!', expand('%:p'), <q-count>)
-    command! -bang GitStat call <SID>GitStat('HEAD', 'HEAD', <q-bang>=='!', expand('%:p'))
     command! -count GitDiffSplit call <SID>GitDiffSplit(expand('%:p'), 'HEAD~'.<q-count>)
     command! GitRemote call <SID>GitRemoteView()
     command! GitStash call <SID>GitStashView()
@@ -797,24 +809,17 @@ function! s:GitRebase(branch, upstream, onto, ...)
     endif
 endfunction
 
-" a:1 = cached, a:2 = files, a:3 = context lines
+" a:1 = cached, a:2 = files, a:3 = context lines, a:4 = mode
+" mode = list of modes: p/s/d/r/o/n for patch, stat, dirstat, raw,
+" shortstat and numstat, defaults to p
 function! s:GitDiff(fcomm, tcomm, ...)
     let cached = exists('a:1') && a:1 ? '--cached' : ''
     let paths = exists('a:2') && !empty(a:2) ? s:ShellJoin(a:2, ' ') : ''
     let ctxl = exists('a:3') ? '-U'.a:3 : ''
-    let cmd = s:GitRead('diff', cached, ctxl, a:tcomm, a:fcomm != a:tcomm ? a:fcomm : '', '--', paths)
+    let modes = exists('a:4') ? s:GitDiffParseModes(a:4, '-p') : '-p'
+    let cmd = s:GitRead('diff', modes, cached, ctxl, a:tcomm, a:fcomm != a:tcomm ? a:fcomm : '', '--', paths)
     call s:GitDiffBuffer('git-diff', cmd, 0)
     let b:gitgraph_diff_args = [ a:fcomm, a:tcomm ] + s:FillList(a:000, 3, 0)
-endfunction
-
-" a:1 = cached, a:2 = dirstat, a:3 = width
-function! s:GitStat(fcomm, tcomm, ...)
-    let cached = exists('a:1') && a:1 ? '--cached' : ''
-    let dirstat = exists('a:2') && a:2 ? '--dirstat' : '--stat'
-    if exists('a:3') && !empty(a:3) | let dirstat = dirstat.'='.a:3 | endif
-    let cmd = s:GitRead('diff', cached, dirstat, a:tcomm, a:fcomm != a:tcomm ? a:fcomm : '')
-    call s:Scratch('git-stat', 'd', cmd)
-    setl ft=gitstat
 endfunction
 
 function! s:GitDiffApply()
@@ -872,11 +877,13 @@ function! s:GitDiffDelete()
     endif
 endfunction
 
-function! s:GitShow(commit)
+" a:1 = modes, the same as in s:GitDiff()
+function! s:GitShow(commit, ...)
     if !empty(a:commit)
-        let cmd = s:GitRead('show', a:commit)
+        let modes = exists('a:1') ? s:GitDiffParseModes(a:1, '-p --stat') : '-p --stat'
+        let cmd = s:GitRead('show', modes, a:commit)
         call s:GitDiffBuffer('git-show', cmd, 1)
-        setl ft=diff.gitlog
+        setl ft=diff.gitlog.gitstat
     endif
 endfunction
 

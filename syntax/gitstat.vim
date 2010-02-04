@@ -8,7 +8,6 @@ syn match gitstatTotalFiles '\d\+ files changed' contained contains=gitstatNumbe
 syn match gitstatTotalAdded '\d\+ insertions(+)' contained contains=gitstatNumber
 syn match gitstatTotalRemoved '\d\+ deletions(-)' contained contains=gitstatNumber
 
-
 hi link gitstatAdded Type
 hi link gitstatRemoved Special
 hi link gitstatNumber Number
