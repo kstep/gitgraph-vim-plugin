@@ -16,11 +16,11 @@ syn cluster gitgraphRefItems contains=gitgraphBranchItem,gitgraphTagItem,gitgrap
 syn cluster gitgraphAuthorMarks contains=gitgraphAuthor,gitgraphDate
 
 syn match gitgraphAuthor "[^],[]\{-1,}" contained contains=@NoSpell nextgroup=gitgraphDate
-syn match gitgraphDate "[0-9]\{4}\(-[0-9]\{2}\)\{2} [0-9]\{1,2}\(:[0-9]\{2}\)\{2} [+-][0-9]\{4}" contains=@NoSpell contained
 syn match gitgraphDate "\([A-Z][a-z]\{2} \)\{2}[0-9]\{1,2} [0-9]\{1,2}\([0-9]\{2}:\)\{2} [0-9]\{4}" contains=@NoSpell contained
 syn match gitgraphDate "\([0-9]\+ \(second\|minute\|hour\|days\|week\|month\|year\)s\?\(, \)\?\)\+ ago" contains=@NoSpell contained
 syn match gitgraphDate "[A-Z][a-z]\{2}, [0-9]\{1,2} [A-Z][a-z]\{2} [0-9]\{4} [0-9]\{1,2}\(:[0-9]\{2}\)\{2} [+-][0-9]\{4}" contains=@NoSpell contained
 syn match gitgraphDate "[0-9]\{4}\(-[0-9]\{2}\)\{2}" contains=@NoSpell contained
+syn match gitgraphDate "[0-9]\{4}\(-[0-9]\{2}\)\{2} [0-9]\{1,2}\(:[0-9]\{2}\)\{2} [+-][0-9]\{4}" contains=@NoSpell contained
 syn match gitgraphDate "[0-9]\{10,} [+-][0-9]\{4}" contains=@NoSpell contained
 
 syn match gitgraphTree1 "1[*\|/_]" contained contains=gitgraphTreeMarker
