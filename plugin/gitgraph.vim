@@ -760,9 +760,19 @@ function! s:GitSys(...)
     return system(s:GitCmd(a:000))
 endfunction
 
-function! s:GitBranch(commit, branch)
+" a:1 = force
+function! s:GitBranch(commit, branch, ...)
     if !empty(a:branch)
-        call s:GitRun('branch', shellescape(a:branch, 1), a:commit)
+        let force = a:0 && a:1 ? '-f' : ''
+        call s:GitRun('branch', force, shellescape(a:branch, 1), a:commit)
+    endif
+endfunction
+
+" a:1 = force
+function! s:GitBranchRename(branch, newname, ...)
+    if !empty(a:branch) && !empty(a:newname) && a:newname != a:branch
+        let force = a:0 && a:1 ? '-M' : '-m'
+        call s:GitRun('branch', force, shellescape(a:branch, 1), shellescape(a:newname, 1))
     endif
 endfunction
 
