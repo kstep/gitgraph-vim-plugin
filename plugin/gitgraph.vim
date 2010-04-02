@@ -132,8 +132,25 @@ function! s:GitGetRepository()
 endfunction
 
 function! s:GitIsSvn()
-    let conf = s:GitSys('config', '--get-regexp', 'svn-remote')
-    return v:shell_error == 0
+    let repopath = s:GitGetRepository()
+    return isdirectory(repopath.'/svn')
+endfunction
+
+function! s:GitIsMerging()
+    let repopath = s:GitGetRepository()
+    return filereadable(repopath.'/MERGE_HEAD')
+endfunction
+function! s:GitIsBisecting()
+    let repopath = s:GitGetRepository()
+    return filereadable(repopath.'/BISECT_LOG')
+endfunction
+
+function! s:GitIsRebasing()
+    let repopath = s:GitGetRepository()
+    for dir in ['rebase-merge', 'rebase-apply', 'rebase'] do
+        if isdirectory(repopath.'/'.dir) | return 1 | endif
+    endfor
+    return 0
 endfunction
 
 function! s:GitGetRemoteBranches(svnonly)
