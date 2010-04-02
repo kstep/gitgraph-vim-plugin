@@ -329,7 +329,7 @@ function! s:GitGraphMappings()
     vmap <buffer> gR :GitRebase!<cr>
     map <buffer> gd :GitDiff<cr>
     map <buffer> gD :GitDiffSplit<cr>
-    map <buffer> gf :GitShow<cr>
+    map <buffer> <CR> :GitShow<cr>
 
     " like gu/gp, but for git-svn
     map <buffer> gU :GitSVNRebase<cr>
