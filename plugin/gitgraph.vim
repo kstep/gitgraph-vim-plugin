@@ -291,6 +291,8 @@ function! s:GitGraphMappings()
     command! -buffer -bang -count GitCommit call <SID>GitCommitView(<SID>GetLineCommit('.'), <q-bang>=='!', 'c', <q-count>)
     command! -buffer -bang GitReset call <SID>GitReset(<SID>GetLineCommit('.'), <q-bang>=='!' ? 'h' : '') | call <SID>GitGraphView()
 
+    command! -buffer -bang GitCherryPick call <SID>GitCherryPick(<SID>GetLineCommit('.'), <q-bang>=='!') | call <SID>GitGraphView()
+
     " (y)ank range into buffer and (r)ebase onto another branch
     map <buffer> Y :GitYankRange<cr>
     vmap <buffer> Y :GitYankRange<cr>
@@ -312,13 +314,15 @@ function! s:GitGraphMappings()
     map <buffer> gu :GitPull<cr>
     map <buffer> gb :GitCheckout<cr>
 
-    " (a)dd (b)ranch, (t)ag, (a)nnotated/(s)igned tag, (c)ommit, a(m)end
+    " (a)dd (b)ranch, (t)ag, (a)nnotated/(s)igned tag, (c)ommit, a(m)end, (p)icked
     map <buffer> ab :GitBranch<cr>
     map <buffer> at :GitTag<cr>
     map <buffer> aa :GitAnnTag<cr>
     map <buffer> as :GitSignedTag<cr>
     map <buffer> ac :GitCommit<cr>
     map <buffer> am :GitCommit!<cr>
+    map <buffer> ap :GitCherryPick<cr>
+    map <buffer> aP :GitCherryPick!<cr>
 
     " (g)o (r)ebase (interactive), (d)iff, (f)ile (aka commit)
     vmap <buffer> gr :GitRebase<space>
@@ -1047,7 +1051,7 @@ function! s:GitCherryPick(commit, ...)
     let nocommit = exists('a:1') && a:1 ? '--no-commit' : ''
     let signoff = exists('a:2') && a:2 ? '--signoff' : ''
     let attrib = exists('a:3') && a:3 ? '-x' : '-r'
-    call s:GitRun('cherry-pick', nocommit, signoff, attrib, shellescape(commit, 1))
+    call s:GitRun('cherry-pick', nocommit, signoff, attrib, shellescape(a:commit, 1))
 endfunction
 
 " a:1 = amend, a:2 = signoff, a:3 = message source: string/(f)ile/(c)ommit
