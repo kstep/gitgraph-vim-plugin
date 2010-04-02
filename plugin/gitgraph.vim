@@ -214,7 +214,7 @@ function! s:GitDiffParseModes(modes, default)
     else
         let modes = ''
         if stridx(a:modes, 'p') >= 0 | let modes .= '-p ' | endif
-        if stridx(a:modes, 's') >= 0 | let modes .= '--stat=0,1000 ' | endif
+        if stridx(a:modes, 's') >= 0 | let modes .= '--stat=0,10000 ' | endif
         if stridx(a:modes, 'd') >= 0 | let modes .= '--dirstat ' | endif
         if stridx(a:modes, 'r') >= 0 | let modes .= '--raw ' | endif
         if stridx(a:modes, 'n') >= 0 | let modes .= '--numstat ' | endif
@@ -907,7 +907,7 @@ endfunction
 " a:1 = modes, the same as in s:GitDiff()
 function! s:GitShow(commit, ...)
     if !empty(a:commit)
-        let modes = exists('a:1') ? s:GitDiffParseModes(a:1, '-p --stat') : '-p --stat'
+        let modes = exists('a:1') ? s:GitDiffParseModes(a:1, '-p --stat=0,10000') : '-p --stat=0,10000'
         let cmd = s:GitPipe('.', 'show', modes, a:commit)
         call s:GitDiffBuffer('git-show', cmd, 1)
         setl ft=diff.gitlog.gitstat
