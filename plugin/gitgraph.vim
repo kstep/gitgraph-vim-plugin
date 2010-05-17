@@ -1015,7 +1015,7 @@ endfunction
 " a:1 = mode: mixed/(s)oft/(h)ard/(m)erge
 function! s:GitReset(commit, ...)
     let mode = exists('a:1') ? (a:1 == 's' ? '--soft' : (a:1 == 'h' ? '--hard' : (a:1 == 'm' ? '--merge' : '--mixed'))) : '--mixed'
-    call s:GitRun('reset', mode, commit)
+    call s:GitRun('reset', mode, a:commit)
 endfunction
 
 function! s:GitRemoveFiles(fname)
