@@ -5,9 +5,9 @@ syn match gitgraphCommittish "\<[0-9a-f]\{7,40}\>" nextgroup=gitgraphRefsList co
 
 syn region gitgraphRefsList start="(" end=")" contains=@gitgraphRefItems,gitgraphRefSep contained
 syn match gitgraphBranchItem "[.a-zA-Z0-9_/-]\+" nextgroup=gitgraphRefSep contains=gitgraphHeadRefItem contained
-syn match gitgraphTagItem "tag:[.a-zA-Z0-9_/-]\+" nextgroup=gitgraphRefSep contained
-syn match gitgraphRemoteItem "remote:[.a-zA-Z0-9_/-]\+" nextgroup=gitgraphRefSep contained
-syn match gitgraphSvnItem "svn:[.a-zA-Z0-9_/-]\+" nextgroup=gitgraphRefSep contained
+syn match gitgraphTagItem "t:[.a-zA-Z0-9_/-]\+" nextgroup=gitgraphRefSep contained
+syn match gitgraphRemoteItem "r:[.a-zA-Z0-9_/-]\+" nextgroup=gitgraphRefSep contained
+syn match gitgraphSvnItem "s:[.a-zA-Z0-9_/-]\+" nextgroup=gitgraphRefSep contained
 syn keyword gitgraphStashItem stash nextgroup=gitgraphRefSep contained
 syn match gitgraphRefSep ", " nextgroup=@gitgraphRefItems contained
 

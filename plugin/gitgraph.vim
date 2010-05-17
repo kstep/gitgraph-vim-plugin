@@ -391,8 +391,8 @@ function! s:GitGraphView(...)
     silent! %s/\[3\([0-9]\)m\([\|/_]\)\[m/\1\2/ge
     silent! %s/\[[0-9]*m//ge
 
-    silent! g/refs\/tags\//s/\(tag: \)\?refs\/tags\//tag:/ge
-    silent! g/refs\/remotes\//s/refs\/remotes\/\([^\/,)]\{-1,}\/\)\@=/remote:/ge|s/refs\/remotes\//svn:/ge
+    silent! g/refs\/tags\//s/\(tag: \)\?refs\/tags\//t:/ge
+    silent! g/refs\/remotes\//s/refs\/remotes\/\([^\/,)]\{-1,}\/\)\@=/r:/ge|s/refs\/remotes\//s:/ge
     silent! g/refs\/heads/s/refs\/heads\///ge
     silent! g/refs\/stash/s/refs\/stash/stash/ge
 
@@ -928,7 +928,7 @@ endfunction
 " a:1 - force
 function! s:GitPush(word, syng, ...)
     if a:syng == 'gitgraphRemoteItem'
-        let parts = split(a:word[7:], '/')
+        let parts = split(a:word[2:], '/')
         let force = exists('a:1') && a:1 ? '-f' : ''
         call s:GitRun('push', force, parts[0], join(parts[1:], '/'))
     endif
@@ -942,7 +942,7 @@ endfunction
 
 function! s:GitPull(word, syng)
     if a:syng == 'gitgraphRemoteItem'
-        let parts = split(a:word[7:], '/')
+        let parts = split(a:word[2:], '/')
         call s:GitRun('pull', parts[0], join(parts[1:], '/'))
     endif
 endfunction
@@ -954,10 +954,10 @@ function! s:GitDelete(word, syng, ...)
         let par = force ? '-D' : '-d'
         let cmd = 'branch ' . par . ' ' . a:word
     elseif a:syng == 'gitgraphTagItem'
-        let cmd = 'tag -d ' . a:word[4:]
+        let cmd = 'tag -d ' . a:word[2:]
     elseif a:syng == 'gitgraphRemoteItem'
         let par = force ? '-f' : ''
-        let parts = split(a:word[7:], "/")
+        let parts = split(a:word[2:], "/")
         let cmd = 'push ' . par . ' ' . parts[0] . ' ' . join(parts[1:], '/') . ':'
     else
         return
