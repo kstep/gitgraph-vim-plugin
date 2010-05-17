@@ -725,6 +725,8 @@ function! s:GitGraphInit()
     command! -count GitDiffSplit call <SID>GitDiffSplit(expand('%:p'), 'HEAD~'.<q-count>)
     command! GitRemote call <SID>GitRemoteView()
     command! GitStash call <SID>GitStashView()
+    command! -count GitRebaseContinue call <SID>GitRebaseGoOn(<q-count>, <q-bang>=='!')
+    command! GitRebaseGoOn let way=confirm('Which way?', "&Continue\n&Skip\n&Abort")|if way|call <SID>GitRebaseGoOn(way!=2,way==3)|endif
 
     command! GitStashSave call <SID>GitStashSave(input('Stash message: '))
     command! GitAddFile call <SID>GitAddFiles(expand('%:p'))
@@ -739,6 +741,7 @@ function! s:GitGraphInit()
     map ,gD :<C-U>exec v:count1."GitDiffSplit"<CR>
     map ,gt :GitStash<cr>
     map ,gr :GitRemote<cr>
+    map ,gn :GitRebaseGoOn<cr>
 
     map ,ga :GitAddFile<cr>
     map ,gA :GitStashSave<cr>
@@ -845,6 +848,16 @@ function! s:GitRebase(branch, upstream, onto, ...)
         let iact = exists('a:1') && a:1 ? '--interactive' : ''
         call s:GitRun('rebase', iact, '--onto', onto, a:upstream, a:branch)
     endif
+endfunction
+
+" a:1 = skip
+function! s:GitRebaseGoOn(continue, ...)
+    if a:continue
+        let action = exists('a:1') && a:1 ? '--skip' : '--continue'
+    else
+        let action = '--abort'
+    endif
+    call s:GitRun('rebase', action)
 endfunction
 
 " a:1 = cached, a:2 = files, a:3 = context lines, a:4 = mode
