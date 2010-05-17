@@ -446,11 +446,13 @@ function! s:GitStatusRevertFile(fname, region)
     if a:region ==# 'gitStaged'
         call s:GitResetFiles(a:fname)
     elseif a:region ==# 'gitUnstaged'
-        let side =  confirm("Which side should I checkout?", "&Theirs\n&Ours)")
-        if !side | return | endif
-        call s:GitCheckoutFiles(a:fname, [0, 't', 'o'][side])
+        call s:GitCheckoutFiles(a:fname, 1)
     elseif a:region ==# 'gitUntracked'
         call s:GitRemoveFiles(a:fname)
+    elseif a:region ==# 'gitUnmerged'
+        let side =  confirm("Which side should I checkout?", "&Theirs\n&Ours")
+        if !side | return | endif
+        call s:GitCheckoutFiles(a:fname, [0, 't', 'o'][side])
     else
         return
     endif
