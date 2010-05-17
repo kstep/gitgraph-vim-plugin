@@ -1034,7 +1034,7 @@ endfunction
 " a:1 = force
 function! s:GitCheckoutFiles(fname, ...)
     if empty(a:fname) | return | endif
-    let force = exists('a:1') && a:1 ? '-f' : ''
+    let force = exists('a:1') && a:1 ? (a:1 == 't' ? '--theirs' : (a:1 == 'o' ? '--ours' : '--force')) : ''
     let files = s:ShellJoin(a:fname, ' ')
     call s:GitRun('checkout', force, '--', files)
 endfunction
