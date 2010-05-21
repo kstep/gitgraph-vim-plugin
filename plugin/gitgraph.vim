@@ -388,7 +388,7 @@ function! s:GitGraphView(...)
     exec cmd
 
     silent! %s/\*\( *\)/ *\1/ge
-    silent! %s/\[3\([0-9]\)m\([\|/_.-]\)\[m/\1\2/ge
+    silent! %s/\[\(1;\)\=3\([0-9]\)m\([\|/_.-]\)\[m/\2\3/ge
     silent! %s/\[[0-9]*m//ge
 
     silent! g/refs\/tags\//s/\(tag: \)\?refs\/tags\//t:/ge
