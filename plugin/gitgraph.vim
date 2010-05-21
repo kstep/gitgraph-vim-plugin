@@ -678,6 +678,10 @@ endfunction
 " Initializator {{{
 function! s:GitGraphInit()
 
+    if !empty(v:servername)
+        let $GIT_EDITOR = 'vim --servername "'.v:servername.'" --remote-tab-wait'
+    endif
+
     " commits subject format to show in graph, defaults to simple commit subject
     if !exists('g:gitgraph_subject_format') || empty(g:gitgraph_subject_format)
         let g:gitgraph_subject_format = '%s'
