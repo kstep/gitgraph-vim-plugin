@@ -275,6 +275,7 @@ function! s:GitGraphMappings()
     command! -buffer -bang GitDelete call <SID>GitDelete(expand('<cword>'), <SID>GetSynName('.', '.'), <q-bang>=='!') | call <SID>GitGraphView()
     command! -buffer -bang GitRevert call <SID>GitRevert(<SID>GetLineCommit('.'), <q-bang>=='!') | call <SID>GitGraphView()
     command! -buffer GitBranch call <SID>GitBranch(<SID>GetLineCommit('.'), input("Enter new branch name: ")) | call <SID>GitGraphView()
+    command! -buffer GitBranchRename call <SID>GitBranchRename(expand('<cword>'), input("Enter new branch name: ", expand('<cword>'))) | call <SID>GitGraphView()
 
     command! -buffer -bang GitTag call <SID>GitTag(<SID>GetLineCommit('.'), input("Enter new tag name: "), <q-bang>=='!') | call <SID>GitGraphView()
     command! -buffer -bang GitSignedTag call <SID>GitCommitView(<SID>GetLineCommit('.'), 0, 'c', 1, 1)
@@ -316,6 +317,7 @@ function! s:GitGraphMappings()
 
     " (a)dd (b)ranch, (t)ag, (a)nnotated/(s)igned tag, (c)ommit, a(m)end, (p)icked
     map <buffer> ab :GitBranch<cr>
+    map <buffer> ar :GitBranchRename<cr>
     map <buffer> at :GitTag<cr>
     map <buffer> aa :GitAnnTag<cr>
     map <buffer> as :GitSignedTag<cr>
