@@ -389,7 +389,7 @@ function! s:GitGraphView(...)
     1,$delete
     exec cmd
 
-    silent! %s/\*\( *\)/ *\1/ge
+    silent! %s/\*\( *\)/*\1/ge
     silent! %s/\[\(1;\)\=3\([0-9]\)m\([\|/_.-]\)\[m/\2\3/ge
     silent! %s/\[[0-9]*m//ge
     silent! %s/\([0-9]\)\([\|/_.-]\(\1[\|/_.-]\)\+\)/\=submatch(1).substitute(submatch(2),submatch(1),'','g')/ge
