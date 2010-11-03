@@ -738,7 +738,7 @@ function! s:GitGraphInit()
     command! -count GitRebaseContinue call <SID>GitRebaseGoOn(<q-count>, <q-bang>=='!')
     command! GitRebaseGoOn let way=confirm('Which way?', "&Continue\n&Skip\n&Abort")|if way|call <SID>GitRebaseGoOn(way!=2,way==3)|endif
 
-    command! GitStashSave call <SID>GitStashSave(input('Stash message: '))
+    command! -nargs=? GitStashSave call <SID>GitStashSave(<q-args>)
     command! GitAddFile call <SID>GitAddFiles(expand('%:p'))
 
     command! GitLayout call <SID>GitLayout()
