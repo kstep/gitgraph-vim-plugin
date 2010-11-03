@@ -138,17 +138,17 @@ endfunction
 
 function! s:GitIsMerging()
     let repopath = s:GitGetRepository()
-    return filereadable(repopath.'/MERGE_HEAD')
+    return filereadable(repopath.'/.git/MERGE_HEAD')
 endfunction
 function! s:GitIsBisecting()
     let repopath = s:GitGetRepository()
-    return filereadable(repopath.'/BISECT_LOG')
+    return filereadable(repopath.'/.git/BISECT_LOG')
 endfunction
 
 function! s:GitIsRebasing()
     let repopath = s:GitGetRepository()
     for dir in ['rebase-merge', 'rebase-apply', 'rebase'] do
-        if isdirectory(repopath.'/'.dir) | return 1 | endif
+        if isdirectory(repopath.'/.git/'.dir) | return 1 | endif
     endfor
     return 0
 endfunction
@@ -568,7 +568,8 @@ function! s:GitCommitView(msg, amend, src, signoff, ...)
     elseif a:amend && empty(a:msg)
         let message = substitute(s:GitSys('cat-file', 'commit', 'HEAD'), '^.\{-}\n\n', '', '')
     else
-        let editmsg = s:GitGetRepository() . '/.git/COMMIT_EDITMSG'
+        let editmsg = s:GitGetRepository() . '/.git/' . (s:GitIsMerging() ? 'MERGE_MSG' : 'COMMIT_EDITMSG')
+        echomsg editmsg
         if empty(a:msg) && filereadable(editmsg)
             let message = readfile(editmsg)
             call filter(message, 'strpart(v:val, 0, 1) != "#"')
