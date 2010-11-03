@@ -23,7 +23,10 @@ syn region gitMDelFile  start='^\t[\[{]-[\]}]' end='$' contained
 syn region gitMModFile  start='^\t{\*}' end='$' contained
 syn cluster gitUnmergedFiles contains=gitMNewFile,gitMDelFile,gitMModFile
 
+syn match gitCurrentBranch '^# On branch.*$'
+
 hi link gitSectionHeader Title
+hi link gitCurrentBranch StatusLine
 
 hi link gitNewFile Type
 

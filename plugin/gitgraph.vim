@@ -502,8 +502,8 @@ function! s:GitStatusView()
     call s:Scratch('git-status:'.fnamemodify(repopath, ':t'), 's', cmd)
     setl ma
 
-    silent! 1,/^#\( Changes\| Changed\| Untracked\| Unmerged\)/-1delete
-    silent! g!/^#\( Changes\| Changed\| Untracked\| Unmerged\|\t\|\s*$\)/delete
+    "silent! 1,/^#\( Changes\| Changed\| Untracked\| Unmerged\)/-1delete
+    silent! g!/^#\( On branch \| Changes\| Changed\| Untracked\| Unmerged\|\t\|\s*$\)/delete
     silent! g/^#\( Changes\| Changed\| Untracked\| Unmerged\)/.+1delete
 
     silent! %s/^#\tnew file:\s\+/\t[+] /e
