@@ -2,7 +2,7 @@
 " TODO syntax highlightng for git status view, commit view...
 
 syn region gitStaged matchgroup=gitSectionHeader start='^# Changes to be committed:' end='^$' contains=@gitTrackedFiles,gitNewFile fold
-syn region gitUnstaged matchgroup=gitSectionHeader start='^# Changed but not updated:' end='^$' contains=@gitTrackedFiles fold
+syn region gitUnstaged matchgroup=gitSectionHeader start='^# Changes not staged for commit:' end='^$' contains=@gitTrackedFiles fold
 
 syn region gitNewFile start='^\t\[+\]' end='$' contained
 syn region gitModFile start='^\t\[\*\]' end='$' contained
