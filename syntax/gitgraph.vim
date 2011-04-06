@@ -33,11 +33,16 @@ syn match gitgraphTree7 "7[*\|/_.-]\+" contained contains=gitgraphTreeMarker
 syn match gitgraphTree8 "8[*\|/_.-]\+" contained contains=gitgraphTreeMarker
 syn match gitgraphTree9 "9[*\|/_.-]\+" contained contains=gitgraphTreeMarker
 syn match gitgraphTreeC " \*" contained
-syn match gitgraphTreeMarker "[0-9]" contained conceal
 
 if has('conceal')
-    setl cole=3 cocu=nvic
+    setl cole=2 cocu=nvic
+    syn conceal on
 endif
+syn match gitgraphTreeMarker "[0-9]" contained
+if has('conceal')
+    syn conceal off
+endif
+
 
 syn match gitgraphKeywords "Merge branch '.\+'"
 
