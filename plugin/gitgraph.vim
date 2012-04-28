@@ -679,6 +679,12 @@ function! s:GitRemoteView()
 endfunction
 " }}}
 
+" GitBranches view implementation {{{
+function! s:GitBranchesView()
+    call s:Scratch('git-branches:'.fnamemodify(s:GitGetRepository(), ':t'), 'r', s:GitPipe('.', 'branch', '-v'))
+endfunction
+" }}}
+
 " Initializator {{{
 function! s:GitGraphInit()
 
@@ -758,6 +764,8 @@ function! s:GitGraphInit()
     map ,gf :exec 'GitGraph "--all" 0 '.expand('%:p')<cr>
 
     map ,go :GitLayout<cr>
+
+    map ,gb :GitBranches<cr>
 endfunction
 " }}}
 
@@ -773,6 +781,8 @@ function! s:GitLayout()
             call s:GitStashView()
         elseif obj == 'r'
             call s:GitRemoteView()
+        elseif obj == 'b'
+            call s:GitBranchesView()
         endif
     endfor
 endfunction
