@@ -734,13 +734,17 @@ function! s:GitGraphInit()
     let s:gitgraph_git_path = g:gitgraph_git_path
     let s:gitgraph_graph_format = shellescape('%Creset%h%d ' . g:gitgraph_subject_format . ' [' . g:gitgraph_authorship_format . ']', 1)
 
-    command! -nargs=* -complete=custom,<SID>GitBranchCompleter GitGraph call <SID>GitGraphView(<f-args>)
     command! GitStatus call <SID>GitStatusView()
-    command! -bang -count -nargs=? GitCommit call <SID>GitCommitView(<q-args>, <q-bang>=='!', '', <q-count>)
-    command! -bang -count=3 GitDiff call <SID>GitDiff('HEAD', 'HEAD', <q-bang>=='!', expand('%:p'), <q-count>)
-    command! -count GitDiffSplit call <SID>GitDiffSplit(expand('%:p'), 'HEAD~'.<q-count>)
     command! GitRemote call <SID>GitRemoteView()
     command! GitStash call <SID>GitStashView()
+    command! GitBranches call <SID>GitBranchesView()
+
+    command! -nargs=* -complete=custom,<SID>GitBranchCompleter GitGraph call <SID>GitGraphView(<f-args>)
+    command! -bang -count -nargs=? GitCommit call <SID>GitCommitView(<q-args>, <q-bang>=='!', '', <q-count>)
+
+    command! -bang -count=3 GitDiff call <SID>GitDiff('HEAD', 'HEAD', <q-bang>=='!', expand('%:p'), <q-count>)
+    command! -count GitDiffSplit call <SID>GitDiffSplit(expand('%:p'), 'HEAD~'.<q-count>)
+
     command! -count GitRebaseContinue call <SID>GitRebaseGoOn(<q-count>, <q-bang>=='!')
     command! GitRebaseGoOn let way=confirm('Which way?', "&Continue\n&Skip\n&Abort")|if way|call <SID>GitRebaseGoOn(way!=2,way==3)|endif
 
