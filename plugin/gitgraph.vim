@@ -537,7 +537,7 @@ function! s:GitStatusView()
     silent! g/^\t[\[{].[\]}] \"/s/\\\([0-7]\+\)/\=eval('"\<Char-0'.submatch(1).'>"')/ge
     setl enc=utf-8
 
-    setl ts=4 noma nomod ft=gitstatus fdm=syntax nowrap cul
+    setl ts=2 noma nomod ft=gitstatus fdm=syntax nowrap cul
     goto 1
 
     call s:GitStatusMappings()
