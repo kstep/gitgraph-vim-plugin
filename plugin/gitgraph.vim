@@ -503,29 +503,29 @@ function! s:GitStatusView()
     setl ma
 
     "silent! 1,/^#\( Changes\| Changed\| Untracked\| Unmerged\)/-1delete
-    silent! g!/^#\( On branch \| Changes\| Changed\| Untracked\| Unmerged\|\t\|\s*$\)/delete
-    silent! g/^#\( Changes\| Changed\| Untracked\| Unmerged\)/.+1delete
+    silent! g!/^\(On branch \|Changes\|Changed\|Untracked\| Unmerged\|\t\|\s*$\)/delete
+    silent! g/\(Changes\|Changed\|Untracked\|Unmerged\)/.+1delete
 
-    silent! %s/^#\tnew file:\s\+/\t[+] /e
-    silent! %s/^#\tmodified:\s\+/\t[*] /e
-    silent! %s/^#\tdeleted:\s\+/\t[-] /e
-    silent! %s/^#\trenamed:\s\+/\t[=] /e
-    silent! %s/^#\tcopied:\s\+/\t[>] /e
-    silent! %s/^#\tunknown:\s\+/\t[?] /e
-    silent! %s/^#\tunmerged:\s\+/\t[%] /e
-    silent! %s/^#\ttypechange:\s\+/\t[@] /e
+    silent! %s/^\tnew file:\s\+/\t[+] /e
+    silent! %s/^\tmodified:\s\+/\t[*] /e
+    silent! %s/^\tdeleted:\s\+/\t[-] /e
+    silent! %s/^\trenamed:\s\+/\t[=] /e
+    silent! %s/^\tcopied:\s\+/\t[>] /e
+    silent! %s/^\tunknown:\s\+/\t[?] /e
+    silent! %s/^\tunmerged:\s\+/\t[%] /e
+    silent! %s/^\ttypechange:\s\+/\t[@] /e
 
-    silent! %s/^#\tboth modified:\s\+/\t{*} /e
-    silent! %s/^#\tboth added:\s\+/\t{+} /e
-    silent! %s/^#\tboth deleted:\s\+/\t{-} /e
+    silent! %s/^\tboth modified:\s\+/\t{*} /e
+    silent! %s/^\tboth added:\s\+/\t{+} /e
+    silent! %s/^\tboth deleted:\s\+/\t{-} /e
 
-    silent! %s/^#\tadded by us:\s\+/\t[+} /e
-    silent! %s/^#\tdeleted by us:\s\+/\t[-} /e
-    silent! %s/^#\tadded by them:\s\+/\t{+] /e
-    silent! %s/^#\tdeleted by them:\s\+/\t{-] /e
+    silent! %s/^\tadded by us:\s\+/\t[+} /e
+    silent! %s/^\tdeleted by us:\s\+/\t[-} /e
+    silent! %s/^\tadded by them:\s\+/\t{+] /e
+    silent! %s/^\tdeleted by them:\s\+/\t{-] /e
 
-    silent! %s/^#\t/\t[ ] /e
-    silent! %s/^#\s*$//e
+    silent! %s/^\t\[\@!/\t[ ] /e
+    silent! %s/^\s*$//e
 
     " I use double conversion latin1->utf-8 in order to unescape
     " octal-escaped utf-8 file names, which can contain git-status output.
