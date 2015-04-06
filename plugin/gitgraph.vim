@@ -503,7 +503,7 @@ function! s:GitStatusView()
     setl ma
 
     "silent! 1,/^#\( Changes\| Changed\| Untracked\| Unmerged\)/-1delete
-    silent! g!/^\(On branch \|Changes\|Changed\|Untracked\| Unmerged\|\t\|\s*$\)/delete
+    silent! g!/^\(On branch \|Changes\|Changed\|Untracked\|Unmerged\|\t\|\s*$\)/delete
     silent! g/\(Changes\|Changed\|Untracked\|Unmerged\)/.+1delete
 
     silent! %s/^\tnew file:\s\+/\t[+] /e
@@ -524,7 +524,7 @@ function! s:GitStatusView()
     silent! %s/^\tadded by them:\s\+/\t{+] /e
     silent! %s/^\tdeleted by them:\s\+/\t{-] /e
 
-    silent! %s/^\t\[\@!/\t[ ] /e
+    silent! %s/^\t[\[\{]\@!/\t[ ] /e
     silent! %s/^\s*$//e
 
     " I use double conversion latin1->utf-8 in order to unescape
